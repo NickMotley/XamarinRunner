@@ -6,42 +6,34 @@ namespace ButtonXaml
 {
     public partial class SettingsPage : ContentPage
     {
-        private IntervalSettings interval;
+        private IntervalSettings intervals;
 
-        public SettingsPage()
+        public SettingsPage(IntervalSettings intervals)
         {
             InitializeComponent();
+            this.Intervals = intervals;
             BindingContext = this.Intervals;
-            //this.GoToCommand = new Command<Type>(NavigateTo);
-
         }
 
         public IntervalSettings Intervals
         {
             get
             {
-                if (this.interval == null)
-                {
-                    this.interval = new IntervalSettings();
-                }
-                return this.interval;
+                //if (this.intervals == null)
+                //{
+                //    this.intervals = new IntervalSettings();
+                //}
+                return this.intervals;
             }
             set
             {
-                this.interval = value;
+                this.intervals = value;
             }
         }
 
-        //public ICommand GoToCommand { private set; get; }
-
-        //async void NavigateTo(Type obj)
-        //{
-        //            await this.Navigation.PushAsync(new Session());
-        //}
-
-        //private void Button_Clicked(object sender, EventArgs e)
-        //{
-        //    this.NavigateTo(null);
-        //}
+        protected override bool OnBackButtonPressed()
+        {
+            return base.OnBackButtonPressed();
+        }
     }
 }

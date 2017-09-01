@@ -7,12 +7,13 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using AudioManager;
 
 using Xamarin.Forms.Platform.Android;
 
 namespace ButtonXaml.Android
 {
-    [Activity(Label = "ButtonXaml", MainLauncher = true, 
+    [Activity(Label = "MotleyRunner", MainLauncher = true, 
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
 	public class MainActivity : FormsApplicationActivity
     {
@@ -23,6 +24,8 @@ namespace ButtonXaml.Android
             Xamarin.Forms.Forms.Init(this, bundle);
 
 			LoadApplication (new App ());
+
+            Initializer.Initialize();
         }
     }
 }

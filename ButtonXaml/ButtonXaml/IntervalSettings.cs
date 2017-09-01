@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using AudioManager;
 using Xamarin.Forms;
 
 namespace ButtonXaml
@@ -10,14 +11,10 @@ namespace ButtonXaml
     public class IntervalSettings : INotifyPropertyChanged
     {
         private Program program;
-
-        private bool runUpdate;
-        //private int interval, intervalFull;
-        //private TimeSpan seg1, seg2;
-        //private TimeSpan seg1Full, seg2Full;
         private buttonState buttonState;
 
         public event PropertyChangedEventHandler PropertyChanged;
+        internal event EventHandler<TimerStatusChangeEvent> StatusChanged;
 
         public IntervalSettings()
         {
@@ -26,22 +23,64 @@ namespace ButtonXaml
 
             this.buttonState = buttonState.Start;
 
-            this.Program = new Program()
-            {
-                Reps = new System.Collections.ObjectModel.ObservableCollection<Rep>()
-                {
-                    new Rep(), new Rep()
-                },
-                Activities = new System.Collections.ObjectModel.ObservableCollection<Activity>()
-                { new Activity()
-                    { Index = 1, ActivityState = ActivityState.Pending, TotalDuration = TimeSpan.FromSeconds(10)
-                    },
-                    new Activity()
-                    { Index = 2, ActivityState = ActivityState.Pending, TotalDuration = TimeSpan.FromSeconds(5)
-                    }
-                }
-            };
+            this.Program = new Program();
+            this.Program.StatusChanged += Program_StatusChanged;
 
+            if (!Application.Current.Properties.ContainsKey("RepCount"))
+            {
+                Application.Current.Properties.Add("RepCount", 1);
+                Application.Current.SavePropertiesAsync();
+            }
+
+            if (!Application.Current.Properties.ContainsKey("ActivityCount"))
+            {
+                Application.Current.Properties.Add("ActivityCount", 1);
+                Application.Current.SavePropertiesAsync();
+            }
+
+            this.Program.InitializeReps();
+            this.Program.InitializeActivities();
+
+        }
+
+        private void Program_StatusChanged(object sender, TimerStatusChangeEvent e)
+        {
+            if (e.Status == TimerState.Complete)
+            {
+                this.buttonState = buttonState.Start;
+                this.OnPropertyChanged("ButtonCaption");
+
+                //Set or Get the state of the Effect sounds.
+                //Audio.Manager.EffectsOn = true;
+
+                //Set the volume level of the Effects from 0 to 1.
+                //Audio.Manager.EffectsVolume = 0.95F;
+
+                PlaySounds();
+
+                this.OnStatusChanged(TimerState.Complete);
+
+            }
+        }
+
+        async void PlaySounds()
+        {
+            //Play an effect sound. On Android the lenth is limeted to 5 seconds.
+            await Audio.Manager.PlaySound("double-beep.mp3");
+        }
+
+        async void PlayHarley()
+        {
+            //Play an effect sound. On Android the lenth is limeted to 5 seconds.
+            await Audio.Manager.PlaySound("harley-start.mp3");
+        }
+
+        public string CurrentTimer
+        {
+            get
+            {
+                return "This Time";
+            }
         }
 
         public Program Program
@@ -67,9 +106,7 @@ namespace ButtonXaml
 
         private void ResetTimer(object obj)
         {
-            runUpdate = false;
             ResetTimes();
-            //interval = intervalFull;
             this.buttonState = buttonState.Start;
             this.OnPropertyChanged("ButtonCaption");
         }
@@ -79,57 +116,22 @@ namespace ButtonXaml
             switch (this.buttonState)
             {
                 case buttonState.Start:
-            //        seg1Full = seg1;
-            //        seg2Full = seg2;
-            //        intervalFull = interval;
+                    PlayHarley();
+                    this.CreateProgram();
+                    this.StartProgram();
                     this.buttonState++;
-            //        runUpdate = true;
-            //        RunUpdateLoop();
                     break;
                 case buttonState.Pause:
-            //        runUpdate = false;
+                    this.PauseProgram();
                     this.buttonState++;
                     break;
                 case buttonState.Resume:
-            //        runUpdate = true;
-            //        RunUpdateLoop();
+                    ResumeProgram();
                     this.buttonState = buttonState.Pause;
                     break;
             }
             this.OnPropertyChanged("ButtonCaption");
         }
-
-        private async void RunUpdateLoop()
-        {
-            while (runUpdate)
-            {
-                await Task.Delay(1000);
-                //if (runUpdate)
-                //{
-                //    if (this.seg1 > TimeSpan.FromSeconds(0))
-                //        this.DecreaseSeg1Count(null);
-                //    else if (this.seg2 > TimeSpan.FromSeconds(0))
-                //        this.DecreaseSeg2Count(null);
-                //    else if (this.Interval > 0)
-                //    {
-                //        this.Interval--;
-                //        ResetTimes();
-                //        this.DecreaseSeg1Count(null);
-                //    }
-                //}
-            }
-        }
-
-        //public int Interval
-        //{
-        //    get {
-        //        return this.interval;
-        //    }
-        //    set {
-        //        this.interval = value;
-        //        this.OnPropertyChanged("Interval");
-        //    }
-        //}
 
         public ICommand StartTimerCommand { get; set; }
         public ICommand PauseTimerCommand { get; set; }
@@ -144,11 +146,47 @@ namespace ButtonXaml
             }
         }
 
+        private void OnStatusChanged(TimerState status)
+        {
+            if (StatusChanged != null)
+            {
+                StatusChanged(this, new TimerStatusChangeEvent(status));
+            }
+        }
+
         private void ResetTimes()
         {
-            //Seg1 = seg1Full;
-            //Seg2 = seg2Full;
+            //using (Ringtone r = RingtoneManager.GetRingtone(ApplicationContext, RingtoneManager.GetDefaultUri(RingtoneType.Ringtone)))
+            //{ r.Play(); }
         }
+
+        private void CreateProgram()
+        {
+            foreach(Rep rep in this.Program.Reps.OrderBy(x => x.Index))
+            {
+                rep.Activities.Clear();
+                foreach (Activity activity in this.Program.Activities.OrderBy(x => x.Index))
+                {
+                    rep.Activities.Add(activity.Clone());
+                }
+            }
+        }
+
+        private void StartProgram()
+        {
+            this.Program.StartTimer();
+        }
+
+        private void PauseProgram()
+        {
+            this.Program.PauseTimer();
+        }
+
+        private void ResumeProgram()
+        {
+            this.Program.ResumeTimer();
+        }
+
     }
 
     enum buttonState

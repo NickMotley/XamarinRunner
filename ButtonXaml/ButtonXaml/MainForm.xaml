@@ -1,14 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="MotleyRunner"
              x:Class="ButtonXaml.MainForm">
     <ContentPage.ToolbarItems>
         <ToolbarItem Name="Settings" Activated="OnClick"  Order="Primary" Priority="0" />
-        <ToolbarItem Name="Program" Activated="OnClick2"  Order="Primary" Priority="1" />
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="Main Form!" />
+            <StackLayout VerticalOptions="CenterAndExpand" >
+                <Label Text="{Binding Program.CurrentRep.Name}" HorizontalOptions="CenterAndExpand" />
+                <Label Text="{Binding Program.CurrentRep.CurrentActivity.Name}" HorizontalOptions="CenterAndExpand" />
+                <Label Text="{Binding Program.CurrentRep.CurrentActivity.RemainingDuration, StringFormat='{}{0:mm\\:ss}'}" FontSize="Large" HorizontalOptions="CenterAndExpand" />
+                <Button Text="{Binding ButtonCaption}" Command="{Binding StartTimerCommand}" HorizontalOptions="Center" />
+                <Button Text="Reset" Command="{Binding ResetTimerCommand}" HorizontalOptions="Center" Margin="20" />
+            </StackLayout>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using AudioManager;
 using Xamarin.Forms;
 
 namespace ButtonXaml
@@ -12,11 +13,12 @@ namespace ButtonXaml
     public class Activity : INotifyPropertyChanged
     {
         private TimeSpan totalDuration;
-        //private bool runUpdate;
+        private TimeSpan remainingDuration;
+
+        private bool runUpdate;
 
         public int Index { get; set; }
-        public ActivityState ActivityState { get; set; }
-        public TimeSpan RemainingDuration { get; set; }
+        internal TimerState ActivityState { get; set; }
         public TimeSpan PausedDuration { get; set; }
 
         public ICommand IncreaseDurationCommand { get; set; }
@@ -30,11 +32,13 @@ namespace ButtonXaml
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        internal event EventHandler<TimerStatusChangeEvent> StatusChanged;
+
         public string Name
         {
             get
             {
-                return "Activity " + this.Index.ToString() + " Timer";
+                return "Activity " + (this.Index + 1).ToString() + " Timer";
             }
         }
 
@@ -60,27 +64,51 @@ namespace ButtonXaml
                 this.OnPropertyChanged("TotalDuration");
             }
         }
-        
-        //private async void RunUpdateLoop()
-        //{
-        //    while (runUpdate)
-        //    {
-        //        await Task.Delay(1000);
-        //        if (runUpdate)
-        //        {
-        //            if (this.RemainingDuration > TimeSpan.FromSeconds(0))
-        //                this.DecreaseSeg1Count(null);
-        //            else if (this.RemainingDuration > TimeSpan.FromSeconds(0))
-        //                this.DecreaseSeg2Count(null);
-        //            else if (this.Interval > 0)
-        //            {
-        //                this.Interval--;
-        //                ResetTimes();
-        //                this.DecreaseSeg1Count(null);
-        //            }
-        //        }
-        //    }
-        //}
+
+        public TimeSpan RemainingDuration
+        {
+            get
+            {
+                return this.remainingDuration;
+            }
+            set
+            {
+                this.remainingDuration = value;
+                this.OnPropertyChanged("RemainingDuration");
+            }
+        }
+
+        private async void RunUpdateLoop()
+        {
+            while (runUpdate)
+            {
+                await Task.Delay(1000);
+                if (runUpdate)
+                {
+                    if (this.RemainingDuration > TimeSpan.FromSeconds(0))
+                    {
+                        if (this.RemainingDuration <= TimeSpan.FromSeconds(3))
+                        {
+                            PlaySounds();
+                        }
+                        this.RemainingDuration = this.RemainingDuration.Add(TimeSpan.FromSeconds(-1));
+                    }
+                    else
+                    {
+                        this.ActivityState = TimerState.Complete;
+                        runUpdate = false;
+                        this.OnStatusChanged(this.ActivityState);
+                    }
+                }
+            }
+        }
+
+        async void PlaySounds()
+        {
+            //Play an effect sound. On Android the lenth is limeted to 5 seconds.
+            await Audio.Manager.PlaySound("single-beep.mp3");
+        }
+
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -90,12 +118,46 @@ namespace ButtonXaml
                     new PropertyChangedEventArgs(propertyName));
             }
         }
-    }
 
-    public enum ActivityState
-    {
-        Pending,
-        Active,
-        Paused
+        private void OnStatusChanged(TimerState status)
+        {
+            if (StatusChanged != null)
+            {
+                StatusChanged(this, new TimerStatusChangeEvent(status));
+            }
+        }
+
+        internal Activity Clone()
+        {
+            Activity clone = new Activity()
+            {
+                ActivityState = this.ActivityState,
+                TotalDuration = this.TotalDuration,
+                Index = this.Index
+            };
+            
+            return clone;
+        }
+
+        internal bool StartTimer()
+        {
+            this.RemainingDuration = this.TotalDuration;
+            this.runUpdate = true;
+            this.RunUpdateLoop();
+            return true;
+        }
+
+        internal bool PauseTimer()
+        {
+            this.runUpdate = false;
+            return true;
+        }
+
+        internal bool ResumeTimer()
+        {
+            this.runUpdate = true;
+            this.RunUpdateLoop();
+            return true;
+        }
     }
 }

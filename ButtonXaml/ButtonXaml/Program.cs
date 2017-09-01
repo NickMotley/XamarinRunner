@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Linq;
 using Xamarin.Forms;
 
 namespace ButtonXaml
@@ -11,6 +13,10 @@ namespace ButtonXaml
         ObservableCollection<Rep> reps;
         ObservableCollection<Activity> activities;
 
+        internal TimerState ActivityState { get; set; }
+
+        Rep currentRep;
+
         public ICommand IncreaseRepsCommand { get; set; }
         public ICommand DecreaseRepsCommand { get; set; }
 
@@ -18,56 +24,66 @@ namespace ButtonXaml
         public ICommand ActivitiesDecreaseCommand { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
+        internal event EventHandler<TimerStatusChangeEvent> StatusChanged;
 
         public Program()
         {
-            this.IncreaseRepsCommand = new Command(IncreaseIntervalCount);
-            this.DecreaseRepsCommand = new Command(DecreaseIntervalCount);
+            this.IncreaseRepsCommand = new Command(IncreaseRepCount);
+            this.DecreaseRepsCommand = new Command(DecreaseRepCount);
 
             this.ActivitiesIncreaseCommand = new Command(IncreaseActivities);
             this.ActivitiesDecreaseCommand = new Command(DecreaseActivities);
-
-            this.Reps = new ObservableCollection<Rep>();
-            //this.Reps.CollectionChanged += Reps_CollectionChanged;
-
-            this.Activities = new ObservableCollection<Activity>();
-            //this.Activities.CollectionChanged += Activities_CollectionChanged;
         }
 
-        //private void Activities_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        //{
-        //    if (e.NewItems != null)
-        //    {
-        //        foreach (Activity newItem in e.NewItems)
-        //        {
-        //            ModifiedItems.Add(newItem);
+        private void Reps_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (Rep item in e.NewItems)
+                {
+                    item.Index = e.NewStartingIndex;
+                    item.StatusChanged += Rep_StatusChanged;
+                }
+            }
+        }
 
-        //            //Add listener for each item on PropertyChanged event
-        //            newItem.PropertyChanged += this.OnItemPropertyChanged;
-        //        }
-        //    }
+        private void Rep_StatusChanged(object sender, TimerStatusChangeEvent e)
+        {
+            if (this.Reps.Any(x => x.ActivityState == TimerState.Pending))
+            {
+                this.StartTimer();
+            }
+            else
+            {
+                this.ActivityState = TimerState.Complete;
+                this.OnStatusChanged(this.ActivityState);
+            }
+        }
 
-        //    if (e.OldItems != null)
-        //    {
-        //        foreach (Item oldItem in e.OldItems)
-        //        {
-        //            ModifiedItems.Add(oldItem);
-
-        //            oldItem.PropertyChanged -= this.OnItemPropertyChanged;
-        //        }
-        //    }
-        //}
-
-        //private void Reps_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        private void Activities_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (Activity item in e.NewItems)
+                {
+                    item.Index = e.NewStartingIndex;
+                    item.ActivityState = TimerState.Pending;
+                    item.TotalDuration = TimeSpan.FromSeconds(10);
+                }
+            }
+        }
 
         public ObservableCollection<Rep> Reps
         {
             get
             {
+                if (this.reps == null)
+                {
+                    this.reps = new ObservableCollection<Rep>();
+                    this.reps.CollectionChanged += Reps_CollectionChanged;
+                }
                 return this.reps;
+               
             }
             set
             {
@@ -76,10 +92,28 @@ namespace ButtonXaml
             }
         }
 
+        public Rep CurrentRep
+        {
+            get
+            {
+                return this.currentRep;
+            }
+            set
+            {
+                this.currentRep = value;
+                this.OnPropertyChanged("CurrentRep");
+            }
+        }
+
         public ObservableCollection<Activity> Activities
         {
             get
             {
+                if (this.activities == null)
+                {
+                    this.activities = new ObservableCollection<Activity>();
+                    this.activities.CollectionChanged += Activities_CollectionChanged;
+                }
                 return this.activities;
             }
             set
@@ -89,28 +123,89 @@ namespace ButtonXaml
             }
         }
 
-        private void IncreaseActivities(object obj)
+        internal void InitializeReps()
         {
-            this.Activities.Add(new Activity() { Index = this.Activities.Count+1, ActivityState = ActivityState.Pending, TotalDuration = TimeSpan.FromSeconds(10) });
-            this.OnPropertyChanged("Activities");
+            int? repCount = Application.Current.Properties["RepCount"] as int?;
+            for (int i = 0; i < (int)repCount; i++)
+            {
+                this.IncreaseRepCount();
+            }
+        }
+
+        internal void IncreaseRepCount()
+        {
+            this.Reps.Add(new Rep());
+            this.UpdateRepCount();
+        }
+
+        private void DecreaseRepCount(object obj)
+        {
+            this.Reps.RemoveAt(this.Reps.Count - 1);
+            this.UpdateRepCount();
+        }
+
+        private void UpdateRepCount()
+        {
+            this.OnPropertyChanged("Reps");
+            Application.Current.Properties["RepCount"] = this.Reps.Count;
+            Application.Current.SavePropertiesAsync();
+        }
+
+        internal void InitializeActivities()
+        {
+            int? repCount = Application.Current.Properties["ActivityCount"] as int?;
+            for (int i = 0; i < (int)repCount; i++)
+            {
+                this.IncreaseActivities();
+            }
+        }
+        internal void IncreaseActivities()
+        {
+            this.Activities.Add(new Activity());
+            UpdateActivitiesCount();
         }
 
         private void DecreaseActivities(object obj)
         {
             this.Activities.RemoveAt(this.Activities.Count - 1);
+            UpdateActivitiesCount();
+        }
+
+        private void UpdateActivitiesCount()
+        {
             this.OnPropertyChanged("Activities");
+            Application.Current.Properties["ActivityCount"] = this.Activities.Count;
+            Application.Current.SavePropertiesAsync();
         }
 
-        private void IncreaseIntervalCount()
+        internal bool StartTimer()
         {
-            this.Reps.Add(new Rep());
-            this.OnPropertyChanged("Reps");
+            this.CurrentRep = this.Reps.OrderBy(x => x.Index).First(x => x.ActivityState == TimerState.Pending);
+            this.CurrentRep.PropertyChanged += CurrentRep_PropertyChanged;
+            return this.CurrentRep.StartTimer();
         }
 
-        private void DecreaseIntervalCount(object obj)
+        internal bool PauseTimer()
         {
-            this.Reps.RemoveAt(this.Reps.Count - 1);
-            this.OnPropertyChanged("Reps");
+            return this.CurrentRep.PauseTimer();
+        }
+
+        internal bool ResumeTimer()
+        {
+            return this.CurrentRep.ResumeTimer();
+        }
+
+        private void CurrentRep_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+
+        }
+
+        private void OnStatusChanged(TimerState status)
+        {
+            if (StatusChanged != null)
+            {
+                StatusChanged(this, new TimerStatusChangeEvent(status));
+            }
         }
 
         protected virtual void OnPropertyChanged(string propertyName)
@@ -121,6 +216,5 @@ namespace ButtonXaml
                     new PropertyChangedEventArgs(propertyName));
             }
         }
-
     }
 }
