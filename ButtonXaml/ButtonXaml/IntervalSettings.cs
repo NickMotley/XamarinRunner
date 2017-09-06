@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using AudioManager;
+using MotleyRunner;
 using Xamarin.Forms;
 
 namespace ButtonXaml
@@ -13,13 +14,15 @@ namespace ButtonXaml
         private Program program;
         private buttonState buttonState;
 
+        private bool canReset;
+
         public event PropertyChangedEventHandler PropertyChanged;
         internal event EventHandler<TimerStatusChangeEvent> StatusChanged;
 
         public IntervalSettings()
         {
-            this.StartTimerCommand = new Command(StartTimer);
-            this.ResetTimerCommand = new Command(ResetTimer);
+            this.StartTimerCommand = new RelayCommand((s) => StartTimer(s), () => canReset);
+            this.ResetTimerCommand = new RelayCommand((s) => StartTimer(s), () => canReset);        //new Command(ResetTimer);
 
             this.buttonState = buttonState.Start;
 
@@ -43,6 +46,29 @@ namespace ButtonXaml
 
         }
 
+        public buttonState ButtonState
+        {
+            get
+            {
+                return this.buttonState;
+            }
+            set
+            {
+                this.buttonState = value;
+                this.OnPropertyChanged("ButtonState");
+                this.OnPropertyChanged("ButtonCaption");
+                this.CanReset = (value != buttonState.Pause);
+            }
+        }
+
+        public string ButtonCaption
+        {
+            get
+            {
+                return this.buttonState.ToString();
+            }
+        }
+
         private void Program_StatusChanged(object sender, TimerStatusChangeEvent e)
         {
             if (e.Status == TimerState.Complete)
@@ -63,16 +89,23 @@ namespace ButtonXaml
             }
         }
 
+        public bool CanReset
+        {
+            get
+            {
+                return this.canReset;
+            }
+            set
+            {
+                this.canReset = value;
+                ResetTimerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
         async void PlaySounds()
         {
             //Play an effect sound. On Android the lenth is limeted to 5 seconds.
             await Audio.Manager.PlaySound("double-beep.mp3");
-        }
-
-        async void PlayHarley()
-        {
-            //Play an effect sound. On Android the lenth is limeted to 5 seconds.
-            await Audio.Manager.PlaySound("harley-start.mp3");
         }
 
         public string CurrentTimer
@@ -96,19 +129,13 @@ namespace ButtonXaml
             }
         }
 
-        public string ButtonCaption
-        {
-            get
-            {
-                return this.buttonState.ToString();
-            }
-        }
-
         private void ResetTimer(object obj)
         {
-            ResetTimes();
-            this.buttonState = buttonState.Start;
-            this.OnPropertyChanged("ButtonCaption");
+            if ((this.buttonState == buttonState.Start) || (this.buttonState == buttonState.Resume))
+            {
+                ResetTimes();
+                this.ButtonState = buttonState.Start;
+            }
         }
 
         private void StartTimer(object obj)
@@ -116,26 +143,25 @@ namespace ButtonXaml
             switch (this.buttonState)
             {
                 case buttonState.Start:
-                    PlayHarley();
+                    this.ButtonState = buttonState.Pause;
                     this.CreateProgram();
                     this.StartProgram();
-                    this.buttonState++;
                     break;
                 case buttonState.Pause:
+                    this.ButtonState = buttonState.Resume;
                     this.PauseProgram();
                     this.buttonState++;
                     break;
                 case buttonState.Resume:
+                    this.ButtonState = buttonState.Pause;
                     ResumeProgram();
-                    this.buttonState = buttonState.Pause;
                     break;
             }
-            this.OnPropertyChanged("ButtonCaption");
         }
 
-        public ICommand StartTimerCommand { get; set; }
+        public RelayCommand StartTimerCommand { get; set; }
         public ICommand PauseTimerCommand { get; set; }
-        public ICommand ResetTimerCommand { get; set; }
+        public RelayCommand ResetTimerCommand { get; set; }
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -174,7 +200,7 @@ namespace ButtonXaml
 
         private void StartProgram()
         {
-            this.Program.StartTimer();
+            this.Program.StartCountDown();
         }
 
         private void PauseProgram()
@@ -189,7 +215,7 @@ namespace ButtonXaml
 
     }
 
-    enum buttonState
+    public enum buttonState
     {
         Start,
         Pause,

@@ -85,9 +85,9 @@ namespace ButtonXaml
                 await Task.Delay(1000);
                 if (runUpdate)
                 {
-                    if (this.RemainingDuration > TimeSpan.FromSeconds(0))
+                    if (this.RemainingDuration.Seconds > 0)
                     {
-                        if (this.RemainingDuration <= TimeSpan.FromSeconds(3))
+                        if (this.RemainingDuration.Seconds <= 3)
                         {
                             PlaySounds();
                         }
@@ -95,6 +95,7 @@ namespace ButtonXaml
                     }
                     else
                     {
+                        PlaySounds();
                         this.ActivityState = TimerState.Complete;
                         runUpdate = false;
                         this.OnStatusChanged(this.ActivityState);
@@ -105,8 +106,15 @@ namespace ButtonXaml
 
         async void PlaySounds()
         {
-            //Play an effect sound. On Android the lenth is limeted to 5 seconds.
-            await Audio.Manager.PlaySound("single-beep.mp3");
+            if (this.RemainingDuration.Seconds > 0)
+            {
+                //Play an effect sound. On Android the lenth is limeted to 5 seconds.
+                await Audio.Manager.PlaySound("single-beep.mp3");
+            }
+            else
+            {
+                await Audio.Manager.PlaySound("double-beep.mp3");
+            }
         }
 
 

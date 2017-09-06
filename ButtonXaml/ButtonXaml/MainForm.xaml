@@ -7,14 +7,20 @@
         <ToolbarItem Name="Settings" Activated="OnClick"  Order="Primary" Priority="0" />
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
-        <StackLayout>
-            <StackLayout VerticalOptions="CenterAndExpand" >
-                <Label Text="{Binding Program.CurrentRep.Name}" HorizontalOptions="CenterAndExpand" />
-                <Label Text="{Binding Program.CurrentRep.CurrentActivity.Name}" HorizontalOptions="CenterAndExpand" />
-                <Label Text="{Binding Program.CurrentRep.CurrentActivity.RemainingDuration, StringFormat='{}{0:mm\\:ss}'}" FontSize="Large" HorizontalOptions="CenterAndExpand" />
-                <Button Text="{Binding ButtonCaption}" Command="{Binding StartTimerCommand}" HorizontalOptions="Center" />
-                <Button Text="Reset" Command="{Binding ResetTimerCommand}" HorizontalOptions="Center" Margin="20" />
+        <Grid>
+            <StackLayout>
+                <StackLayout VerticalOptions="CenterAndExpand" >
+                    <Label Text="{Binding Program.CurrentRep.Name}" HorizontalOptions="CenterAndExpand" />
+                    <Label Text="{Binding Program.CurrentRep.CurrentActivity.Name}" HorizontalOptions="CenterAndExpand" />
+                    <Label Text="{Binding Program.CurrentRep.CurrentActivity.RemainingDuration, StringFormat='{}{0:mm\\:ss}'}" FontSize="Large" HorizontalOptions="CenterAndExpand" />
+                    <Button Text="{Binding ButtonCaption}" Command="{Binding StartTimerCommand}" HorizontalOptions="Center" />
+                    <Button Text="Reset" Command="{Binding ResetTimerCommand}" HorizontalOptions="Center" Margin="20" />
+                </StackLayout>
             </StackLayout>
-        </StackLayout>
+            <Grid BackgroundColor="White" IsVisible="{Binding Program.CountDownIsVisible}">
+                <Label Text="{Binding Program.CountDownRemaining}" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" FontSize="255" FontAttributes="Bold" />
+            </Grid>
+            
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

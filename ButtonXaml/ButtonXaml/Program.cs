@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Windows.Input;
 using System.Linq;
 using Xamarin.Forms;
+using AudioManager;
+using System.Threading.Tasks;
 
 namespace ButtonXaml
 {
@@ -13,7 +15,11 @@ namespace ButtonXaml
         ObservableCollection<Rep> reps;
         ObservableCollection<Activity> activities;
 
+        private bool countDownIsVisible;
+
         internal TimerState ActivityState { get; set; }
+
+        private int countDownRemaining;
 
         Rep currentRep;
 
@@ -123,6 +129,32 @@ namespace ButtonXaml
             }
         }
 
+        public int CountDownRemaining
+        {
+            get
+            {
+                return this.countDownRemaining;
+            }
+            set
+            {
+                this.countDownRemaining = value;
+                this.OnPropertyChanged("CountDownRemaining");
+            }
+        }
+
+        public bool CountDownIsVisible
+        {
+            get
+            {
+                return this.countDownIsVisible;
+            }
+            set
+            {
+                this.countDownIsVisible = value;
+                this.OnPropertyChanged("CountDownIsVisible");
+            }
+        }
+
         internal void InitializeReps()
         {
             int? repCount = Application.Current.Properties["RepCount"] as int?;
@@ -176,6 +208,49 @@ namespace ButtonXaml
             this.OnPropertyChanged("Activities");
             Application.Current.Properties["ActivityCount"] = this.Activities.Count;
             Application.Current.SavePropertiesAsync();
+        }
+
+        internal void StartCountDown()
+        {
+            this.CountDownRemaining = 5;
+            this.CountDownIsVisible = true;
+            Device.StartTimer(new TimeSpan(0, 0, 0, 0, 1000), TimerElapsed);
+        }
+
+        private bool TimerElapsed()
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                //put here your code which updates the view
+                if (this.CountDownRemaining > 1)
+                {
+                    this.CountDownRemaining = this.CountDownRemaining - 1;
+                }
+                else
+                {
+                    this.CountDownIsVisible = false;
+                }
+            });
+
+            if (this.CountDownRemaining > 1)
+            {
+                PlayCountDownSound();
+                return true;
+            }
+            else
+            {
+                this.CountDownIsVisible = false;
+                StartTimer();
+                return false;
+            }
+            //return true to keep timer reccuring
+            //return false to stop timer
+        }
+
+        async void PlayCountDownSound()
+        {
+            //Play an effect sound. On Android the lenth is limeted to 5 seconds.
+            await Audio.Manager.PlaySound("single-beep.mp3");
         }
 
         internal bool StartTimer()
