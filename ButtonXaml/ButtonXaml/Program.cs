@@ -166,7 +166,8 @@ namespace ButtonXaml
 
         internal void IncreaseRepCount()
         {
-            this.Reps.Add(new Rep());
+            Rep rep = new Rep();
+            this.Reps.Add(rep);
             this.UpdateRepCount();
         }
 
@@ -186,15 +187,35 @@ namespace ButtonXaml
         internal void InitializeActivities()
         {
             int? repCount = Application.Current.Properties["ActivityCount"] as int?;
+            string actTimes = Application.Current.Properties["ActivityTimes"] as string;
+
             for (int i = 0; i < (int)repCount; i++)
             {
                 this.IncreaseActivities();
+                this.Activities[i].TotalDuration = TimeSpan.FromSeconds(int.Parse(actTimes.Split(',')[i]));
             }
         }
         internal void IncreaseActivities()
         {
-            this.Activities.Add(new Activity());
+            Activity activity = new Activity();
+            activity.PropertyChanged += Activity_PropertyChanged;
+            this.Activities.Add(activity);
             UpdateActivitiesCount();
+        }
+
+        private void Activity_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "TotalDuration")
+            {
+                string times = string.Empty;
+                foreach (Activity activity in this.Activities.OrderBy(x => x.Index))
+                {
+                    times += activity.TotalDuration.TotalSeconds.ToString() + ",";
+                }
+                times = times.Substring(0, times.Length - 1);
+                Application.Current.Properties["ActivityTimes"] = times;
+                Application.Current.SavePropertiesAsync();
+            }
         }
 
         private void DecreaseActivities(object obj)
@@ -268,6 +289,16 @@ namespace ButtonXaml
         internal bool ResumeTimer()
         {
             return this.CurrentRep.ResumeTimer();
+        }
+
+        internal bool ResetTimer()
+        {
+            foreach (Rep rep in this.Reps.OrderBy(x => x.Index))
+            {
+                rep.ResetTimer();
+            }
+            this.CurrentRep = this.Reps.OrderBy(x => x.Index).First();
+            return true;
         }
 
         private void CurrentRep_PropertyChanged(object sender, PropertyChangedEventArgs e)

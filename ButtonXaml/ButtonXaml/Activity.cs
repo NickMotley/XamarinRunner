@@ -139,7 +139,7 @@ namespace ButtonXaml
         {
             Activity clone = new Activity()
             {
-                ActivityState = this.ActivityState,
+                ActivityState = TimerState.Pending,
                 TotalDuration = this.TotalDuration,
                 Index = this.Index
             };

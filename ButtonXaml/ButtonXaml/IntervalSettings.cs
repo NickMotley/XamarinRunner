@@ -21,8 +21,8 @@ namespace ButtonXaml
 
         public IntervalSettings()
         {
-            this.StartTimerCommand = new RelayCommand((s) => StartTimer(s), () => canReset);
-            this.ResetTimerCommand = new RelayCommand((s) => StartTimer(s), () => canReset);        //new Command(ResetTimer);
+            this.StartTimerCommand = new RelayCommand((s) => StartTimer(s), null);
+            this.ResetTimerCommand = new RelayCommand((s) => ResetTimer(s), () => CanReset);
 
             this.buttonState = buttonState.Start;
 
@@ -41,6 +41,12 @@ namespace ButtonXaml
                 Application.Current.SavePropertiesAsync();
             }
 
+            if (!Application.Current.Properties.ContainsKey("ActivityTimes"))
+            {
+                Application.Current.Properties.Add("ActivityTimes", "12,8");
+                Application.Current.SavePropertiesAsync();
+            }
+
             this.Program.InitializeReps();
             this.Program.InitializeActivities();
 
@@ -54,10 +60,13 @@ namespace ButtonXaml
             }
             set
             {
-                this.buttonState = value;
-                this.OnPropertyChanged("ButtonState");
-                this.OnPropertyChanged("ButtonCaption");
-                this.CanReset = (value != buttonState.Pause);
+                if ( this.buttonState != value)
+                {
+                    this.buttonState = value;
+                    this.OnPropertyChanged("ButtonState");
+                    this.OnPropertyChanged("ButtonCaption");
+                    this.CanReset = (value != buttonState.Pause);
+                }
             }
         }
 
@@ -97,8 +106,12 @@ namespace ButtonXaml
             }
             set
             {
-                this.canReset = value;
-                ResetTimerCommand.RaiseCanExecuteChanged();
+                if ( this.canReset != value)
+                {
+                    this.canReset = value;
+                    ResetTimerCommand.RaiseCanExecuteChanged();
+                    this.OnPropertyChanged("CanReset");
+                }
             }
         }
 
@@ -150,7 +163,6 @@ namespace ButtonXaml
                 case buttonState.Pause:
                     this.ButtonState = buttonState.Resume;
                     this.PauseProgram();
-                    this.buttonState++;
                     break;
                 case buttonState.Resume:
                     this.ButtonState = buttonState.Pause;
@@ -160,7 +172,6 @@ namespace ButtonXaml
         }
 
         public RelayCommand StartTimerCommand { get; set; }
-        public ICommand PauseTimerCommand { get; set; }
         public RelayCommand ResetTimerCommand { get; set; }
 
         protected virtual void OnPropertyChanged(string propertyName)
@@ -182,8 +193,7 @@ namespace ButtonXaml
 
         private void ResetTimes()
         {
-            //using (Ringtone r = RingtoneManager.GetRingtone(ApplicationContext, RingtoneManager.GetDefaultUri(RingtoneType.Ringtone)))
-            //{ r.Play(); }
+            this.Program.ResetTimer();
         }
 
         private void CreateProgram()

@@ -25,11 +25,31 @@ namespace ButtonXaml
                 {
                     this.activities = new ObservableCollection<Activity>();
                 }
+                this.activities.CollectionChanged += Activities_CollectionChanged;
                 return this.activities;
             }
             set
             {
                 this.activities = value;
+            }
+        }
+
+        private void Activities_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach( Activity activity in e.NewItems)
+                {
+                    activity.PropertyChanged += Activity_PropertyChanged;
+                }
+            }
+        }
+
+        private void Activity_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "TotalDuration")
+            {
+                this.OnPropertyChanged("TotalDuration");
             }
         }
 
@@ -65,6 +85,17 @@ namespace ButtonXaml
             this.CurrentActivity.StatusChanged += CurrentActivity_StatusChanged;
 
             return CurrentActivity.StartTimer();
+        }
+
+        internal bool ResetTimer()
+        {
+            foreach (Activity activity in this.Activities.OrderBy(x => x.Index))
+            {
+                activity.ActivityState = TimerState.Pending;
+                activity.RemainingDuration = activity.TotalDuration;
+            }
+            this.CurrentActivity = this.Activities.OrderBy(x => x.Index).First();
+            return true;
         }
 
         private void CurrentActivity_StatusChanged(object sender, TimerStatusChangeEvent e)
