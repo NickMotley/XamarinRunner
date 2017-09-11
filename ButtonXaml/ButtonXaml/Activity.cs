@@ -38,7 +38,7 @@ namespace ButtonXaml
         {
             get
             {
-                return "Activity " + (this.Index + 1).ToString() + " Timer";
+                return "Interval " + (this.Index + 1).ToString();   // + " Timer";
             }
         }
 
@@ -87,7 +87,7 @@ namespace ButtonXaml
                 {
                     if (this.RemainingDuration.Seconds > 0)
                     {
-                        if (this.RemainingDuration.Seconds <= 3)
+                        if (this.RemainingDuration.Seconds <= 4)
                         {
                             PlaySounds();
                         }
@@ -95,7 +95,7 @@ namespace ButtonXaml
                     }
                     else
                     {
-                        PlaySounds();
+                        //PlaySounds();
                         this.ActivityState = TimerState.Complete;
                         runUpdate = false;
                         this.OnStatusChanged(this.ActivityState);
@@ -106,7 +106,7 @@ namespace ButtonXaml
 
         async void PlaySounds()
         {
-            if (this.RemainingDuration.Seconds > 0)
+            if (this.RemainingDuration.Seconds > 1)
             {
                 //Play an effect sound. On Android the lenth is limeted to 5 seconds.
                 await Audio.Manager.PlaySound("single-beep.mp3");
@@ -120,19 +120,12 @@ namespace ButtonXaml
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this,
-                    new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void OnStatusChanged(TimerState status)
         {
-            if (StatusChanged != null)
-            {
-                StatusChanged(this, new TimerStatusChangeEvent(status));
-            }
+            StatusChanged?.Invoke(this, new TimerStatusChangeEvent(status));
         }
 
         internal Activity Clone()

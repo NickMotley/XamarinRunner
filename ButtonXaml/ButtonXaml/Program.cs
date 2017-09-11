@@ -253,9 +253,10 @@ namespace ButtonXaml
                 }
             });
 
+            PlayCountDownSound();
+
             if (this.CountDownRemaining > 1)
             {
-                PlayCountDownSound();
                 return true;
             }
             else
@@ -270,8 +271,17 @@ namespace ButtonXaml
 
         async void PlayCountDownSound()
         {
-            //Play an effect sound. On Android the lenth is limeted to 5 seconds.
-            await Audio.Manager.PlaySound("single-beep.mp3");
+            if (this.CountDownRemaining > 1)
+            {
+                //Play an effect sound. On Android the lenth is limeted to 5 seconds.
+                await Audio.Manager.PlaySound("single-beep.mp3");
+            }
+            else
+            {
+                //Play an effect sound. On Android the lenth is limeted to 5 seconds.
+                await Audio.Manager.PlaySound("double-beep.mp3");
+            }
+
         }
 
         internal bool StartTimer()
@@ -308,19 +318,12 @@ namespace ButtonXaml
 
         private void OnStatusChanged(TimerState status)
         {
-            if (StatusChanged != null)
-            {
-                StatusChanged(this, new TimerStatusChangeEvent(status));
-            }
+            StatusChanged?.Invoke(this, new TimerStatusChangeEvent(status));
         }
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this,
-                    new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

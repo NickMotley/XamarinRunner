@@ -12,7 +12,7 @@ namespace ButtonXaml
     public class IntervalSettings : INotifyPropertyChanged
     {
         private Program program;
-        private buttonState buttonState;
+        private ButtonState buttonState;
 
         private bool canReset;
 
@@ -24,7 +24,7 @@ namespace ButtonXaml
             this.StartTimerCommand = new RelayCommand((s) => StartTimer(s), null);
             this.ResetTimerCommand = new RelayCommand((s) => ResetTimer(s), () => CanReset);
 
-            this.buttonState = buttonState.Start;
+            this.buttonState = ButtonState.Start;
 
             this.Program = new Program();
             this.Program.StatusChanged += Program_StatusChanged;
@@ -52,7 +52,7 @@ namespace ButtonXaml
 
         }
 
-        public buttonState ButtonState
+        public ButtonState ButtonState
         {
             get
             {
@@ -65,7 +65,7 @@ namespace ButtonXaml
                     this.buttonState = value;
                     this.OnPropertyChanged("ButtonState");
                     this.OnPropertyChanged("ButtonCaption");
-                    this.CanReset = (value != buttonState.Pause);
+                    this.CanReset = (value != ButtonState.Pause);
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace ButtonXaml
         {
             if (e.Status == TimerState.Complete)
             {
-                this.buttonState = buttonState.Start;
+                this.buttonState = ButtonState.Start;
                 this.OnPropertyChanged("ButtonCaption");
 
                 //Set or Get the state of the Effect sounds.
@@ -144,10 +144,10 @@ namespace ButtonXaml
 
         private void ResetTimer(object obj)
         {
-            if ((this.buttonState == buttonState.Start) || (this.buttonState == buttonState.Resume))
+            if ((this.buttonState == ButtonState.Start) || (this.buttonState == ButtonState.Resume))
             {
                 ResetTimes();
-                this.ButtonState = buttonState.Start;
+                this.ButtonState = ButtonState.Start;
             }
         }
 
@@ -155,17 +155,17 @@ namespace ButtonXaml
         {
             switch (this.buttonState)
             {
-                case buttonState.Start:
-                    this.ButtonState = buttonState.Pause;
+                case ButtonState.Start:
+                    this.ButtonState = ButtonState.Pause;
                     this.CreateProgram();
                     this.StartProgram();
                     break;
-                case buttonState.Pause:
-                    this.ButtonState = buttonState.Resume;
+                case ButtonState.Pause:
+                    this.ButtonState = ButtonState.Resume;
                     this.PauseProgram();
                     break;
-                case buttonState.Resume:
-                    this.ButtonState = buttonState.Pause;
+                case ButtonState.Resume:
+                    this.ButtonState = ButtonState.Pause;
                     ResumeProgram();
                     break;
             }
@@ -176,19 +176,12 @@ namespace ButtonXaml
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this,
-                    new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void OnStatusChanged(TimerState status)
         {
-            if (StatusChanged != null)
-            {
-                StatusChanged(this, new TimerStatusChangeEvent(status));
-            }
+            StatusChanged?.Invoke(this, new TimerStatusChangeEvent(status));
         }
 
         private void ResetTimes()
@@ -225,7 +218,7 @@ namespace ButtonXaml
 
     }
 
-    public enum buttonState
+    public enum ButtonState
     {
         Start,
         Pause,

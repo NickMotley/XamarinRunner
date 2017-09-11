@@ -14,7 +14,7 @@ namespace ButtonXaml
         internal int Index { get; set; }
         internal TimerState ActivityState { get; set; }
 
-        ObservableCollection<Activity> activities { get; set; }
+        ObservableCollection<Activity> activities;
         Activity currentActivity;
 
         public ObservableCollection<Activity> Activities
@@ -73,7 +73,7 @@ namespace ButtonXaml
         {
             get
             {
-                return "Rep " + (this.Index+1).ToString();
+                return "Set " + (this.Index+1).ToString();
             }
         }
 
@@ -131,19 +131,12 @@ namespace ButtonXaml
 
         private void OnStatusChanged(TimerState status)
         {
-            if (StatusChanged != null)
-            {
-                StatusChanged(this, new TimerStatusChangeEvent(status));
-            }
+            StatusChanged?.Invoke(this, new TimerStatusChangeEvent(status));
         }
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this,
-                    new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
     }

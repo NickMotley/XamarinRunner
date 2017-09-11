@@ -8,16 +8,25 @@
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <Grid>
-            <StackLayout>
-                <StackLayout VerticalOptions="CenterAndExpand" >
-                    <Label Text="{Binding Program.CurrentRep.Name}" HorizontalOptions="CenterAndExpand" />
-                    <Label Text="{Binding Program.CurrentRep.CurrentActivity.Name}" HorizontalOptions="CenterAndExpand" />
-                    <Label Text="{Binding Program.CurrentRep.CurrentActivity.RemainingDuration, StringFormat='{}{0:mm\\:ss}'}" FontSize="Large" HorizontalOptions="CenterAndExpand" />
-                    <Button Text="{Binding ButtonCaption}" Command="{Binding StartTimerCommand}" HorizontalOptions="Center" />
-                    <Button Text="Reset" Command="{Binding ResetTimerCommand}" HorizontalOptions="Center" Margin="20" />
-                </StackLayout>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            
+            <StackLayout VerticalOptions="CenterAndExpand" Grid.Row="0" >
+                <Label Text="{Binding Program.CurrentRep.Name}" HorizontalOptions="CenterAndExpand" FontSize="50" />
+                <Label Text="{Binding Program.CurrentRep.CurrentActivity.Name}" HorizontalOptions="CenterAndExpand" FontSize="50" />
             </StackLayout>
-            <Grid BackgroundColor="White" IsVisible="{Binding Program.CountDownIsVisible}">
+            
+            <Label Text="{Binding Program.CurrentRep.CurrentActivity.RemainingDuration, StringFormat='{}{0:mm\\:ss}'}" FontSize="120" TextColor="Blue" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Grid.Row="1" />
+            
+            <StackLayout Orientation="Vertical" Grid.Row="2">
+                <Button Text="{Binding ButtonCaption}" Command="{Binding StartTimerCommand}" HorizontalOptions="FillAndExpand" BackgroundColor="DarkGreen" FontSize="60" />
+                <Button Text="Reset" Command="{Binding ResetTimerCommand}" HorizontalOptions="FillAndExpand" FontSize="60" />
+            </StackLayout>
+            
+            <Grid BackgroundColor="White" IsVisible="{Binding Program.CountDownIsVisible}" Grid.RowSpan="3">
                 <Label Text="{Binding Program.CountDownRemaining}" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" FontSize="255" FontAttributes="Bold" />
             </Grid>
             
