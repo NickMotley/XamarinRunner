@@ -14,6 +14,13 @@
                 <Button Text="+" Command="{Binding Program.IncreaseRepsCommand}" HorizontalOptions="End" />
             </StackLayout>
 
+            <Label Text="Ratio"/>
+            <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                <Button Text="-" Command="{Binding Program.ProgressRatioDecreaseCommand}" HorizontalOptions="Start" />
+                <Entry Text="{Binding Program.ProgressRatio}" HorizontalOptions="CenterAndExpand"/>
+                <Button Text="+" Command="{Binding Program.ProgressRatioIncreaseCommand}" HorizontalOptions="End" />
+            </StackLayout>
+
             <Label Text="Activities"/>
             <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                 <Button Text="-" Command="{Binding Program.ActivitiesDecreaseCommand}" HorizontalOptions="Start" />

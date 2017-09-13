@@ -2,11 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Windows.Input;
 using System.Linq;
-using Xamarin.Forms;
+using System.Windows.Input;
 using AudioManager;
-using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace ButtonXaml
 {
@@ -21,6 +20,8 @@ namespace ButtonXaml
 
         private int countDownRemaining;
 
+        private int progressRatio;
+
         Rep currentRep;
 
         public ICommand IncreaseRepsCommand { get; set; }
@@ -28,6 +29,9 @@ namespace ButtonXaml
 
         public ICommand ActivitiesIncreaseCommand { get; set; }
         public ICommand ActivitiesDecreaseCommand { get; set; }
+        
+        public ICommand ProgressRatioIncreaseCommand { get; set; }
+        public ICommand ProgressRatioDecreaseCommand { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
         internal event EventHandler<TimerStatusChangeEvent> StatusChanged;
@@ -39,6 +43,78 @@ namespace ButtonXaml
 
             this.ActivitiesIncreaseCommand = new Command(IncreaseActivities);
             this.ActivitiesDecreaseCommand = new Command(DecreaseActivities);
+
+            this.ProgressRatioIncreaseCommand = new Command(IncreaseRatioDecrease);
+            this.ProgressRatioDecreaseCommand = new Command(DecreaseRatioDecrease);
+        }
+
+        #region ProgressRatio
+
+        private void DecreaseRatioDecrease(object obj)
+        {
+            this.ProgressRatio = this.ProgressRatio - 1;
+        }
+
+        private void IncreaseRatioDecrease(object obj)
+        {
+            this.ProgressRatio = this.ProgressRatio + 1;
+        }
+
+        public int ProgressRatio
+        {
+            get
+            {
+                return this.progressRatio;
+            }
+
+            set
+            {
+                this.progressRatio = value;
+                this.OnPropertyChanged("ProgressRatio");
+                Application.Current.Properties["ProgressRatio"] = value;
+                Application.Current.SavePropertiesAsync();
+            }
+        }
+
+        internal void InitializeProgressRatio()
+        {
+            this.ProgressRatio = (int)(Application.Current.Properties["ProgressRatio"] as int?);
+        }
+
+        #endregion
+
+        #region Reps
+
+        public ObservableCollection<Rep> Reps
+        {
+            get
+            {
+                if (this.reps == null)
+                {
+                    this.reps = new ObservableCollection<Rep>();
+                    this.reps.CollectionChanged += Reps_CollectionChanged;
+                }
+                return this.reps;
+
+            }
+            set
+            {
+                this.reps = value;
+                this.OnPropertyChanged("Reps");
+            }
+        }
+
+        public Rep CurrentRep
+        {
+            get
+            {
+                return this.currentRep;
+            }
+            set
+            {
+                this.currentRep = value;
+                this.OnPropertyChanged("CurrentRep");
+            }
         }
 
         private void Reps_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -63,95 +139,6 @@ namespace ButtonXaml
             {
                 this.ActivityState = TimerState.Complete;
                 this.OnStatusChanged(this.ActivityState);
-            }
-        }
-
-        private void Activities_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (Activity item in e.NewItems)
-                {
-                    item.Index = e.NewStartingIndex;
-                    item.ActivityState = TimerState.Pending;
-                    item.TotalDuration = TimeSpan.FromSeconds(10);
-                }
-            }
-        }
-
-        public ObservableCollection<Rep> Reps
-        {
-            get
-            {
-                if (this.reps == null)
-                {
-                    this.reps = new ObservableCollection<Rep>();
-                    this.reps.CollectionChanged += Reps_CollectionChanged;
-                }
-                return this.reps;
-               
-            }
-            set
-            {
-                this.reps = value;
-                this.OnPropertyChanged("Reps");
-            }
-        }
-
-        public Rep CurrentRep
-        {
-            get
-            {
-                return this.currentRep;
-            }
-            set
-            {
-                this.currentRep = value;
-                this.OnPropertyChanged("CurrentRep");
-            }
-        }
-
-        public ObservableCollection<Activity> Activities
-        {
-            get
-            {
-                if (this.activities == null)
-                {
-                    this.activities = new ObservableCollection<Activity>();
-                    this.activities.CollectionChanged += Activities_CollectionChanged;
-                }
-                return this.activities;
-            }
-            set
-            {
-                this.activities = value;
-                this.OnPropertyChanged("Activities");
-            }
-        }
-
-        public int CountDownRemaining
-        {
-            get
-            {
-                return this.countDownRemaining;
-            }
-            set
-            {
-                this.countDownRemaining = value;
-                this.OnPropertyChanged("CountDownRemaining");
-            }
-        }
-
-        public bool CountDownIsVisible
-        {
-            get
-            {
-                return this.countDownIsVisible;
-            }
-            set
-            {
-                this.countDownIsVisible = value;
-                this.OnPropertyChanged("CountDownIsVisible");
             }
         }
 
@@ -184,6 +171,33 @@ namespace ButtonXaml
             Application.Current.SavePropertiesAsync();
         }
 
+        private void CurrentRep_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+
+        }
+
+        #endregion
+
+        #region Activities
+
+        public ObservableCollection<Activity> Activities
+        {
+            get
+            {
+                if (this.activities == null)
+                {
+                    this.activities = new ObservableCollection<Activity>();
+                    this.activities.CollectionChanged += Activities_CollectionChanged;
+                }
+                return this.activities;
+            }
+            set
+            {
+                this.activities = value;
+                this.OnPropertyChanged("Activities");
+            }
+        }
+
         internal void InitializeActivities()
         {
             int? repCount = Application.Current.Properties["ActivityCount"] as int?;
@@ -195,12 +209,39 @@ namespace ButtonXaml
                 this.Activities[i].TotalDuration = TimeSpan.FromSeconds(int.Parse(actTimes.Split(',')[i]));
             }
         }
+
         internal void IncreaseActivities()
         {
             Activity activity = new Activity();
             activity.PropertyChanged += Activity_PropertyChanged;
             this.Activities.Add(activity);
             UpdateActivitiesCount();
+        }
+
+        private void DecreaseActivities(object obj)
+        {
+            this.Activities.RemoveAt(this.Activities.Count - 1);
+            UpdateActivitiesCount();
+        }
+
+        private void UpdateActivitiesCount()
+        {
+            this.OnPropertyChanged("Activities");
+            Application.Current.Properties["ActivityCount"] = this.Activities.Count;
+            Application.Current.SavePropertiesAsync();
+        }
+
+        private void Activities_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (Activity item in e.NewItems)
+                {
+                    item.Index = e.NewStartingIndex;
+                    item.ActivityState = TimerState.Pending;
+                    item.TotalDuration = TimeSpan.FromSeconds(10);
+                }
+            }
         }
 
         private void Activity_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -218,17 +259,34 @@ namespace ButtonXaml
             }
         }
 
-        private void DecreaseActivities(object obj)
+
+
+        #endregion
+
+        public int CountDownRemaining
         {
-            this.Activities.RemoveAt(this.Activities.Count - 1);
-            UpdateActivitiesCount();
+            get
+            {
+                return this.countDownRemaining;
+            }
+            set
+            {
+                this.countDownRemaining = value;
+                this.OnPropertyChanged("CountDownRemaining");
+            }
         }
 
-        private void UpdateActivitiesCount()
+        public bool CountDownIsVisible
         {
-            this.OnPropertyChanged("Activities");
-            Application.Current.Properties["ActivityCount"] = this.Activities.Count;
-            Application.Current.SavePropertiesAsync();
+            get
+            {
+                return this.countDownIsVisible;
+            }
+            set
+            {
+                this.countDownIsVisible = value;
+                this.OnPropertyChanged("CountDownIsVisible");
+            }
         }
 
         internal void StartCountDown()
@@ -309,11 +367,6 @@ namespace ButtonXaml
             }
             this.CurrentRep = this.Reps.OrderBy(x => x.Index).First();
             return true;
-        }
-
-        private void CurrentRep_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-
         }
 
         private void OnStatusChanged(TimerState status)

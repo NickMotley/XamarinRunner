@@ -4,7 +4,7 @@
              Title="MotleyRunner"
              x:Class="ButtonXaml.MainForm">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Name="Settings" Activated="OnClick"  Order="Primary" Priority="0" />
+        <ToolbarItem Name="Settings" Activated="OnClick" Order="Primary" Priority="0" Icon="icon_settings.png" />
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <Grid>

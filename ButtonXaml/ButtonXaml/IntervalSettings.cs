@@ -47,8 +47,15 @@ namespace ButtonXaml
                 Application.Current.SavePropertiesAsync();
             }
 
+            if (!Application.Current.Properties.ContainsKey("ProgressRatio"))
+            {
+                Application.Current.Properties.Add("ProgressRatio", 50);
+                Application.Current.SavePropertiesAsync();
+            }
+
             this.Program.InitializeReps();
             this.Program.InitializeActivities();
+            this.Program.InitializeProgressRatio();
 
         }
 

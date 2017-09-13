@@ -163,6 +163,8 @@
     <AndroidAsset Include="Assets\Sounds\double-beep.mp3" />
     <AndroidAsset Include="Assets\Sounds\harley-start.mp3" />
     <Content Include="Properties\AndroidManifest.xml" />
+    <AndroidResource Include="Resources\Drawable\icon_usersettings.png" />
+    <AndroidResource Include="Resources\Drawable\icon_settings.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ButtonXaml\ButtonXaml.csproj">
