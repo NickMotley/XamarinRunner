@@ -198,12 +198,33 @@ namespace ButtonXaml
 
         private void CreateProgram()
         {
-            foreach(Rep rep in this.Program.Reps.OrderBy(x => x.Index))
+            double midpoint = (this.Program.Reps.Count() + 1) / 2.0;
+            double increments = this.Program.Reps.Count() - midpoint;
+
+            foreach (Rep rep in this.Program.Reps.OrderBy(x => x.Index))
             {
+                rep.ActivityState = TimerState.Pending;
                 rep.Activities.Clear();
+                double offset = (rep.Index + 1) - midpoint;
+                double incrementRatio = this.Program.ProgressRatio / increments;
+                double incrementAdjustment = incrementRatio * offset / 100;
                 foreach (Activity activity in this.Program.Activities.OrderBy(x => x.Index))
                 {
-                    rep.Activities.Add(activity.Clone());
+                    int adj = 0;
+                    if (activity.Index == 1)
+                    {
+                        adj = 1;
+                    }
+                    else
+                    {
+                        adj = -1;
+                    }
+                    double incrementValue = activity.TotalDuration.Seconds + activity.TotalDuration.Seconds * incrementAdjustment * adj;
+                    Activity act = activity.Clone();
+                    act.TotalDuration = TimeSpan.FromSeconds(incrementValue);
+
+                    rep.Activities.Add(act);
+                    
                 }
             }
         }

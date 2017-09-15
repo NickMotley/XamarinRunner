@@ -85,9 +85,9 @@ namespace ButtonXaml
                 await Task.Delay(1000);
                 if (runUpdate)
                 {
-                    if (this.RemainingDuration.Seconds > 0)
+                    if (this.RemainingDuration.TotalSeconds > 0)
                     {
-                        if (this.RemainingDuration.Seconds <= 4)
+                        if (this.RemainingDuration.TotalSeconds <= 4)
                         {
                             PlaySounds();
                         }

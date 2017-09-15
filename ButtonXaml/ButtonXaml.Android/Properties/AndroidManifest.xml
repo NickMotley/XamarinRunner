@@ -1,5 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="preferExternal" package="MotleyRunner.MotleyRunner" android:versionCode="1" android:versionName="Beta">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" package="MotleyRunner.MotleyRunner" android:versionCode="1" android:versionName="Beta">
 	<uses-sdk android:minSdkVersion="24" android:targetSdkVersion="24" />
-	<application android:label="MotleyRunner"></application>
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+	<uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<application android:label="MotleyRunner">
+		<meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyCa5lc3D3Ettv5QENH4buqYsaWp-O8A4lM" />
+	</application>
 </manifest>
