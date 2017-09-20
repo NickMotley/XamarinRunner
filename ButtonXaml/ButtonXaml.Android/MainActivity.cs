@@ -1,21 +1,18 @@
-﻿using System;
-
-using Android.App;
-using Android.Content;
+﻿using Android.App;
 using Android.Content.PM;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using Android.OS;
+using Android.Support.V7.App;
 using AudioManager;
-
 using Xamarin.Forms.Platform.Android;
 
 namespace ButtonXaml.Android
 {
-    [Activity(Label = "MotleyRunner", MainLauncher = true, 
+    //[Activity(Label = "MotleyRunner", MainLauncher = true, 
+    //    ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    //public class MainActivity : FormsApplicationActivity
+    [Activity(Label = "MotleyRunner", 
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-	public class MainActivity : FormsApplicationActivity
+    public class MainActivity : FormsApplicationActivity
     {
         protected override void OnCreate(Bundle bundle)
         {

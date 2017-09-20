@@ -16,7 +16,7 @@
             </Grid.RowDefinitions>
 
             <!-- The map control -->
-            <controls:MotleyRunnerMap x:Name="mapView" Grid.Row="0" Grid.RowSpan="3" IsShowingUser="true" MapType="Street" />
+            <!--<controls:MotleyRunnerMap x:Name="mapView" Grid.Row="0" Grid.RowSpan="3" IsShowingUser="true" MapType="Street" />-->
             
             <StackLayout VerticalOptions="CenterAndExpand" Grid.Row="0" >
                 <Label Text="{Binding Program.CurrentRep.Name}" HorizontalOptions="CenterAndExpand" FontSize="50" />

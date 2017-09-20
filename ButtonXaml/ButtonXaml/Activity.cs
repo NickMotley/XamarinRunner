@@ -10,7 +10,7 @@ using Xamarin.Forms;
 
 namespace ButtonXaml
 {
-    public class Activity : INotifyPropertyChanged
+    public class UserActivity : INotifyPropertyChanged
     {
         private TimeSpan totalDuration;
         private TimeSpan remainingDuration;
@@ -24,7 +24,7 @@ namespace ButtonXaml
         public ICommand IncreaseDurationCommand { get; set; }
         public ICommand DecreaseDurationCommand { get; set; }
 
-        public Activity()
+        public UserActivity()
         {
             this.DecreaseDurationCommand = new Command(DecreaseDuration);
             this.IncreaseDurationCommand = new Command(IncreaseDuration);
@@ -85,28 +85,44 @@ namespace ButtonXaml
                 await Task.Delay(1000);
                 if (runUpdate)
                 {
-                    if (this.RemainingDuration.TotalSeconds > 0)
+                    this.RemainingDuration = this.RemainingDuration.Add(TimeSpan.FromSeconds(-1));
+
+                    if (this.RemainingDuration.Minutes == 0 && this.RemainingDuration.Seconds == 0)
                     {
-                        if (this.RemainingDuration.TotalSeconds <= 4)
-                        {
-                            PlaySounds();
-                        }
-                        this.RemainingDuration = this.RemainingDuration.Add(TimeSpan.FromSeconds(-1));
-                    }
-                    else
-                    {
-                        //PlaySounds();
+                        PlaySounds();
                         this.ActivityState = TimerState.Complete;
                         runUpdate = false;
                         this.OnStatusChanged(this.ActivityState);
                     }
+                    else
+                    {
+                        if (this.RemainingDuration.Minutes == 0)
+                        {
+                            if (this.RemainingDuration.Seconds < 4)
+                            {
+                                PlaySounds();
+                            }
+                        }
+                    }
+
+                    //if (this.RemainingDuration.Minutes > 0 || this.RemainingDuration.Seconds > 0)
+                    //{
+                    //    if (this.RemainingDuration.Minutes < 1 && this.RemainingDuration.Seconds <= 3)
+                    //    {
+                    //        PlaySounds();
+                    //    }
+                    //    this.RemainingDuration = this.RemainingDuration.Add(TimeSpan.FromSeconds(-1));
+                    //}
+                    //else
+                    //{
+                    //}
                 }
             }
         }
 
         async void PlaySounds()
         {
-            if (this.RemainingDuration.Seconds > 1)
+            if (this.RemainingDuration.Seconds > 0)
             {
                 //Play an effect sound. On Android the lenth is limeted to 5 seconds.
                 await Audio.Manager.PlaySound("single-beep.mp3");
@@ -128,9 +144,9 @@ namespace ButtonXaml
             StatusChanged?.Invoke(this, new TimerStatusChangeEvent(status));
         }
 
-        internal Activity Clone()
+        internal UserActivity Clone()
         {
-            Activity clone = new Activity()
+            UserActivity clone = new UserActivity()
             {
                 ActivityState = TimerState.Pending,
                 TotalDuration = this.TotalDuration,

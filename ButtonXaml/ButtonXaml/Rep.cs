@@ -14,23 +14,23 @@ namespace ButtonXaml
         internal int Index { get; set; }
         internal TimerState ActivityState { get; set; }
 
-        ObservableCollection<Activity> activities;
-        Activity currentActivity;
+        ObservableCollection<UserActivity> userActivities;
+        UserActivity currentActivity;
 
-        public ObservableCollection<Activity> Activities
+        public ObservableCollection<UserActivity> UserActivities
         {
             get
             {
-                if (this.activities == null)
+                if (this.userActivities == null)
                 {
-                    this.activities = new ObservableCollection<Activity>();
+                    this.userActivities = new ObservableCollection<UserActivity>();
                 }
-                this.activities.CollectionChanged += Activities_CollectionChanged;
-                return this.activities;
+                this.userActivities.CollectionChanged += Activities_CollectionChanged;
+                return this.userActivities;
             }
             set
             {
-                this.activities = value;
+                this.userActivities = value;
             }
         }
 
@@ -38,7 +38,7 @@ namespace ButtonXaml
         {
             if (e.NewItems != null)
             {
-                foreach( Activity activity in e.NewItems)
+                foreach( UserActivity activity in e.NewItems)
                 {
                     activity.PropertyChanged += Activity_PropertyChanged;
                 }
@@ -53,7 +53,7 @@ namespace ButtonXaml
             }
         }
 
-        public Activity CurrentActivity
+        public UserActivity CurrentActivity
         {
             get
             {
@@ -79,7 +79,7 @@ namespace ButtonXaml
 
         internal bool StartTimer()
         {
-            this.CurrentActivity = this.Activities.OrderBy(x => x.Index).First(x => x.ActivityState == TimerState.Pending);
+            this.CurrentActivity = this.UserActivities.OrderBy(x => x.Index).First(x => x.ActivityState == TimerState.Pending);
             Debug.WriteLine("Action: " + CurrentActivity.Name);
             this.CurrentActivity.PropertyChanged += CurrentActivity_PropertyChanged;
             this.CurrentActivity.StatusChanged += CurrentActivity_StatusChanged;
@@ -89,12 +89,12 @@ namespace ButtonXaml
 
         internal bool ResetTimer()
         {
-            foreach (Activity activity in this.Activities.OrderBy(x => x.Index))
+            foreach (UserActivity activity in this.UserActivities.OrderBy(x => x.Index))
             {
                 activity.ActivityState = TimerState.Pending;
                 activity.RemainingDuration = activity.TotalDuration;
             }
-            this.CurrentActivity = this.Activities.OrderBy(x => x.Index).First();
+            this.CurrentActivity = this.UserActivities.OrderBy(x => x.Index).First();
             return true;
         }
 
@@ -102,7 +102,7 @@ namespace ButtonXaml
         {
             if (e.Status == TimerState.Complete)
             {
-                if (this.Activities.OrderBy(x => x.Index).Any(x => x.ActivityState == TimerState.Pending))
+                if (this.UserActivities.OrderBy(x => x.Index).Any(x => x.ActivityState == TimerState.Pending))
                 {
                     StartTimer();
                 }

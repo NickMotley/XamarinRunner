@@ -12,7 +12,7 @@ namespace ButtonXaml
     public class Program : INotifyPropertyChanged
     {
         ObservableCollection<Rep> reps;
-        ObservableCollection<Activity> activities;
+        ObservableCollection<UserActivity> activities;
 
         private bool countDownIsVisible;
 
@@ -180,13 +180,13 @@ namespace ButtonXaml
 
         #region Activities
 
-        public ObservableCollection<Activity> Activities
+        public ObservableCollection<UserActivity> Activities
         {
             get
             {
                 if (this.activities == null)
                 {
-                    this.activities = new ObservableCollection<Activity>();
+                    this.activities = new ObservableCollection<UserActivity>();
                     this.activities.CollectionChanged += Activities_CollectionChanged;
                 }
                 return this.activities;
@@ -212,7 +212,7 @@ namespace ButtonXaml
 
         internal void IncreaseActivities()
         {
-            Activity activity = new Activity();
+            UserActivity activity = new UserActivity();
             activity.PropertyChanged += Activity_PropertyChanged;
             this.Activities.Add(activity);
             UpdateActivitiesCount();
@@ -235,7 +235,7 @@ namespace ButtonXaml
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                foreach (Activity item in e.NewItems)
+                foreach (UserActivity item in e.NewItems)
                 {
                     item.Index = e.NewStartingIndex;
                     item.ActivityState = TimerState.Pending;
@@ -249,7 +249,7 @@ namespace ButtonXaml
             if (e.PropertyName == "TotalDuration")
             {
                 string times = string.Empty;
-                foreach (Activity activity in this.Activities.OrderBy(x => x.Index))
+                foreach (UserActivity activity in this.Activities.OrderBy(x => x.Index))
                 {
                     times += activity.TotalDuration.TotalSeconds.ToString() + ",";
                 }

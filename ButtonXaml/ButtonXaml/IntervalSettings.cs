@@ -92,12 +92,6 @@ namespace ButtonXaml
                 this.buttonState = ButtonState.Start;
                 this.OnPropertyChanged("ButtonCaption");
 
-                //Set or Get the state of the Effect sounds.
-                //Audio.Manager.EffectsOn = true;
-
-                //Set the volume level of the Effects from 0 to 1.
-                //Audio.Manager.EffectsVolume = 0.95F;
-
                 PlaySounds();
 
                 this.OnStatusChanged(TimerState.Complete);
@@ -122,10 +116,16 @@ namespace ButtonXaml
             }
         }
 
-        async void PlaySounds()
+        //async void PlaySounds()
+        //{
+        //    //Play an effect sound. On Android the lenth is limeted to 5 seconds.
+        //    await Audio.Manager.PlaySound("double-beep.mp3");
+        //}
+
+        void PlaySounds()
         {
             //Play an effect sound. On Android the lenth is limeted to 5 seconds.
-            await Audio.Manager.PlaySound("double-beep.mp3");
+            Audio.Manager.PlaySound("double-beep.mp3");
         }
 
         public string CurrentTimer
@@ -204,11 +204,11 @@ namespace ButtonXaml
             foreach (Rep rep in this.Program.Reps.OrderBy(x => x.Index))
             {
                 rep.ActivityState = TimerState.Pending;
-                rep.Activities.Clear();
+                rep.UserActivities.Clear();
                 double offset = (rep.Index + 1) - midpoint;
                 double incrementRatio = this.Program.ProgressRatio / increments;
                 double incrementAdjustment = incrementRatio * offset / 100;
-                foreach (Activity activity in this.Program.Activities.OrderBy(x => x.Index))
+                foreach (UserActivity activity in this.Program.Activities.OrderBy(x => x.Index))
                 {
                     int adj = 0;
                     if (activity.Index == 1)
@@ -219,11 +219,11 @@ namespace ButtonXaml
                     {
                         adj = -1;
                     }
-                    double incrementValue = activity.TotalDuration.Seconds + activity.TotalDuration.Seconds * incrementAdjustment * adj;
-                    Activity act = activity.Clone();
+                    double incrementValue = activity.TotalDuration.TotalSeconds + activity.TotalDuration.TotalSeconds * incrementAdjustment * adj;
+                    UserActivity act = activity.Clone();
                     act.TotalDuration = TimeSpan.FromSeconds(incrementValue);
 
-                    rep.Activities.Add(act);
+                    rep.UserActivities.Add(act);
                     
                 }
             }
