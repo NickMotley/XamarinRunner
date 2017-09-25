@@ -13,6 +13,7 @@ namespace ButtonXaml
     {
         ObservableCollection<Rep> reps;
         ObservableCollection<UserActivity> activities;
+        private DateTime startTime;
 
         private bool countDownIsVisible;
 
@@ -47,6 +48,8 @@ namespace ButtonXaml
             this.ProgressRatioIncreaseCommand = new Command(IncreaseRatioDecrease);
             this.ProgressRatioDecreaseCommand = new Command(DecreaseRatioDecrease);
         }
+
+        public TimeSpan TotalTime { get; set; }
 
         #region ProgressRatio
 
@@ -138,6 +141,7 @@ namespace ButtonXaml
             else
             {
                 this.ActivityState = TimerState.Complete;
+                this.TotalTime = DateTime.Now - this.startTime;
                 this.OnStatusChanged(this.ActivityState);
             }
         }
@@ -298,6 +302,9 @@ namespace ButtonXaml
 
         private bool TimerElapsed()
         {
+            //return true to keep timer reccuring
+            //return false to stop timer
+
             Device.BeginInvokeOnMainThread(() =>
             {
                 //put here your code which updates the view
@@ -320,11 +327,10 @@ namespace ButtonXaml
             else
             {
                 this.CountDownIsVisible = false;
+                this.startTime = DateTime.Now;
                 StartTimer();
                 return false;
             }
-            //return true to keep timer reccuring
-            //return false to stop timer
         }
 
         async void PlayCountDownSound()

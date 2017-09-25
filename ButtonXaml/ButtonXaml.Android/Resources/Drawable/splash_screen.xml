@@ -5,14 +5,12 @@
 	</item>
 	<item>
 		<bitmap
-			android:src="@drawable/stopwatch"
+			android:src="@drawable/stopwatchInv"
 			android:tileMode="disabled"
-			android:gravity="center"/>
+			android:gravity="center"
+			android:layout_gravity="center" />
 	</item>
 </layer-list>
 
-<!-- <?xml version="1.0" encoding="utf-8" ?>
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-  android:src="@drawable/stopwatch"
-  android:gravity="center"
-  android:layout_gravity="center"/> -->
+
+<!--  -->

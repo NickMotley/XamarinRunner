@@ -14,8 +14,9 @@ namespace ButtonXaml
     {
         private TimeSpan totalDuration;
         private TimeSpan remainingDuration;
-
         private bool runUpdate;
+
+        private DateTime startTime;
 
         public int Index { get; set; }
         internal TimerState ActivityState { get; set; }
@@ -78,6 +79,66 @@ namespace ButtonXaml
             }
         }
 
+        public TimeSpan TotalTime { get; set; }
+
+        //private bool TimerElapsed()
+        //{
+        //    //return true to keep timer reccuring
+        //    //return false to stop timer
+
+        //    if (runUpdate)
+        //    {
+        //        Device.BeginInvokeOnMainThread(() =>
+        //        {
+        //            //put here your code which updates the view
+        //            this.RemainingDuration = this.RemainingDuration.Add(TimeSpan.FromSeconds(-1));
+
+        //            if (this.RemainingDuration.Minutes == 0 && this.RemainingDuration.Seconds == 0)
+        //            {
+        //                PlaySounds();
+        //                this.ActivityState = TimerState.Complete;
+        //                //runUpdate = false;
+        //                this.OnStatusChanged(this.ActivityState);
+        //            }
+        //            else
+        //            {
+        //                if (this.RemainingDuration.Minutes == 0)
+        //                {
+        //                    if (this.RemainingDuration.Seconds < 4)
+        //                    {
+        //                        PlaySounds();
+        //                    }
+        //                }
+        //            }
+
+        //        });
+
+        //        if (this.RemainingDuration.Minutes == 0 && this.RemainingDuration.Seconds == 0)
+        //        {
+        //            //PlaySounds();
+        //            //this.ActivityState = TimerState.Complete;
+        //            ////runUpdate = false;
+        //            //this.OnStatusChanged(this.ActivityState);
+        //            return false;
+        //        }
+        //        else
+        //        {
+        //            //if (this.RemainingDuration.Minutes == 0)
+        //            //{
+        //            //    if (this.RemainingDuration.Seconds < 4)
+        //            //    {
+        //            //        PlaySounds();
+        //            //    }
+        //            //}
+        //            return true;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
+
         private async void RunUpdateLoop()
         {
             while (runUpdate)
@@ -89,6 +150,7 @@ namespace ButtonXaml
 
                     if (this.RemainingDuration.Minutes == 0 && this.RemainingDuration.Seconds == 0)
                     {
+                        this.TotalTime = DateTime.Now - this.startTime;
                         PlaySounds();
                         this.ActivityState = TimerState.Complete;
                         runUpdate = false;
@@ -158,9 +220,11 @@ namespace ButtonXaml
 
         internal bool StartTimer()
         {
+            this.startTime = DateTime.Now;
             this.RemainingDuration = this.TotalDuration;
             this.runUpdate = true;
             this.RunUpdateLoop();
+            //Device.StartTimer(new TimeSpan(0, 0, 0, 0, 1000), TimerElapsed);
             return true;
         }
 
@@ -174,6 +238,7 @@ namespace ButtonXaml
         {
             this.runUpdate = true;
             this.RunUpdateLoop();
+            //Device.StartTimer(new TimeSpan(0, 0, 0, 0, 1000), TimerElapsed);
             return true;
         }
     }

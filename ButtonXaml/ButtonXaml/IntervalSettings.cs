@@ -116,24 +116,10 @@ namespace ButtonXaml
             }
         }
 
-        //async void PlaySounds()
-        //{
-        //    //Play an effect sound. On Android the lenth is limeted to 5 seconds.
-        //    await Audio.Manager.PlaySound("double-beep.mp3");
-        //}
-
-        void PlaySounds()
+        async void PlaySounds()
         {
             //Play an effect sound. On Android the lenth is limeted to 5 seconds.
-            Audio.Manager.PlaySound("double-beep.mp3");
-        }
-
-        public string CurrentTimer
-        {
-            get
-            {
-                return "This Time";
-            }
+            await Audio.Manager.PlaySound("double-beep.mp3");
         }
 
         public Program Program
@@ -236,11 +222,13 @@ namespace ButtonXaml
 
         private void PauseProgram()
         {
+            this.PlaySounds();
             this.Program.PauseTimer();
         }
 
         private void ResumeProgram()
         {
+            this.PlaySounds();
             this.Program.ResumeTimer();
         }
 

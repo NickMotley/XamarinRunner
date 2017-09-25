@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MotleyRunner.ReportsForm">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackLayout Grid.Row="0">
+
+                <Label Text="CONGRATS!!!!!!" FontSize="48" />
+
+                <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                    <Label Text="Total Duration: " HorizontalOptions="Start" />
+                    <Label Text="{Binding Program.TotalTime, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="Start" />
+                </StackLayout>
+            </StackLayout>
+
+
+            <ListView Grid.Row="1" ItemsSource="{Binding Program.Reps}" HasUnevenRows="True" BackgroundColor="Yellow" >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <ViewCell.View>
+                                <Grid VerticalOptions="FillAndExpand" BackgroundColor="DarkGoldenrod" Margin="2" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    
+                                    <Label Grid.Row="0" Text="{Binding Name}" BackgroundColor="Blue" />
+                                    
+                                    <StackLayout Grid.Row="1" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                        <Label Text="Total Duration: " HorizontalOptions="Start" />
+                                        <Label Text="{Binding TotalTime, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="Start" />
+                                    </StackLayout>
+
+                                    <ListView Grid.Row="2" ItemsSource="{Binding UserActivities}" VerticalOptions="Start" HasUnevenRows="True" BackgroundColor="Beige">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <ViewCell>
+                                                    <ViewCell.View>
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                            </Grid.RowDefinitions>
+
+                                                            <Label Text="{Binding Name}" FontSize="Large" />
+                                                            <StackLayout Grid.Row="1" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                                <Label Text="Total Duration: " HorizontalOptions="Start" />
+                                                                <Label Text="{Binding TotalTime, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="Start" />
+                                                            </StackLayout>
+
+                                                        </Grid>
+                                                    </ViewCell.View>
+                                                </ViewCell>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+
+
+                                </Grid>
+                            </ViewCell.View>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Button Grid.Row="2" Text="Close" HorizontalOptions="CenterAndExpand" />
+
+        </Grid>
+
+    </ContentPage.Content>
+</ContentPage>

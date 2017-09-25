@@ -6,7 +6,6 @@ namespace ButtonXaml
 {
     public partial class SettingsPage : ContentPage
     {
-        private IntervalSettings intervals;
 
         public SettingsPage(IntervalSettings intervals)
         {
@@ -15,21 +14,7 @@ namespace ButtonXaml
             BindingContext = this.Intervals;
         }
 
-        public IntervalSettings Intervals
-        {
-            get
-            {
-                //if (this.intervals == null)
-                //{
-                //    this.intervals = new IntervalSettings();
-                //}
-                return this.intervals;
-            }
-            set
-            {
-                this.intervals = value;
-            }
-        }
+        public IntervalSettings Intervals { get; set; }
 
         protected override bool OnBackButtonPressed()
         {

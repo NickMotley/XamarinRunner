@@ -1,5 +1,6 @@
 ﻿using System;
 using AudioManager;
+using MotleyRunner;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -20,11 +21,35 @@ namespace ButtonXaml
             this.Intervals.StatusChanged += Intervals_StatusChanged;
             BindingContext = this.Intervals;
 
+            //this.Content = new Xamarin.Forms.Maps.Map()
+            //{
+            //    IsShowingUser = true,
+            //    HeightRequest = 100,
+            //    WidthRequest = 960,
+            //    VerticalOptions = LayoutOptions.FillAndExpand
+            //};
+
         }
         
         private void Intervals_StatusChanged(object sender, TimerStatusChangeEvent e)
         {
-            DisplayAlert("Timer", "Complete!", "Cool!");
+            string m = string.Empty;
+            foreach (Rep r in this.Intervals.Program.Reps)
+            {
+                m += "Rep: " + r.Name + " " + r.TotalTime.TotalSeconds + "\r\n";
+                foreach (UserActivity ua in r.UserActivities)
+                { 
+                    m += "Act: " + ua.Name + " " + ua.TotalTime.TotalSeconds + "\r\n";
+                }
+                m += "\r\n";
+
+            }
+
+            string msg = "Complete after " +  string.Format("{0:mm\\:ss}", this.Intervals.Program.TotalTime);       // + this.Intervals.Program.TotalTime.ToString();
+            DisplayAlert("Timer", m, "Well Done!");
+
+            NavigateToReports();
+
         }
 
         public IntervalSettings Intervals
@@ -41,6 +66,12 @@ namespace ButtonXaml
             {
                 this.intervals = value;
             }
+        }
+
+        async void NavigateToReports()
+        {
+            ReportsForm page = new ReportsForm(this.intervals);
+            await this.Navigation.PushAsync(page);
         }
 
         async void NavigateToSettings()
@@ -69,7 +100,6 @@ namespace ButtonXaml
             await Audio.Manager.PlaySound("harley-start.mp3");
             Audio.Manager.EffectsVolume = 1.0F;
         }
-
 
         protected override bool OnBackButtonPressed()
         {

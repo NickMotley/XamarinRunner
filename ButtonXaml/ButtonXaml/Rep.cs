@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ButtonXaml
 {
@@ -13,6 +10,8 @@ namespace ButtonXaml
     {
         internal int Index { get; set; }
         internal TimerState ActivityState { get; set; }
+
+        private DateTime startTime;
 
         ObservableCollection<UserActivity> userActivities;
         UserActivity currentActivity;
@@ -57,6 +56,10 @@ namespace ButtonXaml
         {
             get
             {
+                if (this.currentActivity == null)
+                {
+                    this.currentActivity = new UserActivity();
+                }
                 return this.currentActivity;
             }
             set
@@ -79,6 +82,12 @@ namespace ButtonXaml
 
         internal bool StartTimer()
         {
+            if (this.ActivityState == TimerState.Pending)
+            {
+                this.startTime = DateTime.Now;
+                this.ActivityState = TimerState.Active;
+            }
+
             this.CurrentActivity = this.UserActivities.OrderBy(x => x.Index).First(x => x.ActivityState == TimerState.Pending);
             Debug.WriteLine("Action: " + CurrentActivity.Name);
             this.CurrentActivity.PropertyChanged += CurrentActivity_PropertyChanged;
@@ -94,9 +103,12 @@ namespace ButtonXaml
                 activity.ActivityState = TimerState.Pending;
                 activity.RemainingDuration = activity.TotalDuration;
             }
+            
             this.CurrentActivity = this.UserActivities.OrderBy(x => x.Index).First();
             return true;
         }
+
+        public TimeSpan TotalTime { get; set; }
 
         private void CurrentActivity_StatusChanged(object sender, TimerStatusChangeEvent e)
         {
@@ -108,6 +120,7 @@ namespace ButtonXaml
                 }
                 else
                 {
+                    this.TotalTime = DateTime.Now - this.startTime;
                     this.ActivityState = TimerState.Complete;
                     this.OnStatusChanged(this.ActivityState);
                 }
