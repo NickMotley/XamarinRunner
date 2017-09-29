@@ -20,36 +20,11 @@ namespace ButtonXaml
             this.Intervals = new IntervalSettings();
             this.Intervals.StatusChanged += Intervals_StatusChanged;
             BindingContext = this.Intervals;
-
-            //this.Content = new Xamarin.Forms.Maps.Map()
-            //{
-            //    IsShowingUser = true,
-            //    HeightRequest = 100,
-            //    WidthRequest = 960,
-            //    VerticalOptions = LayoutOptions.FillAndExpand
-            //};
-
         }
         
         private void Intervals_StatusChanged(object sender, TimerStatusChangeEvent e)
         {
-            string m = string.Empty;
-            foreach (Rep r in this.Intervals.Program.Reps)
-            {
-                m += "Rep: " + r.Name + " " + r.TotalTime.TotalSeconds + "\r\n";
-                foreach (UserActivity ua in r.UserActivities)
-                { 
-                    m += "Act: " + ua.Name + " " + ua.TotalTime.TotalSeconds + "\r\n";
-                }
-                m += "\r\n";
-
-            }
-
-            string msg = "Complete after " +  string.Format("{0:mm\\:ss}", this.Intervals.Program.TotalTime);       // + this.Intervals.Program.TotalTime.ToString();
-            DisplayAlert("Timer", m, "Well Done!");
-
             NavigateToReports();
-
         }
 
         public IntervalSettings Intervals
@@ -104,6 +79,11 @@ namespace ButtonXaml
         protected override bool OnBackButtonPressed()
         {
             return base.OnBackButtonPressed();
+        }
+
+        private void Report_Activated(object sender, EventArgs e)
+        {
+            this.NavigateToReports();
         }
     }
 }

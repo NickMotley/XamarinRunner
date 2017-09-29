@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using AudioManager;
@@ -13,10 +10,13 @@ namespace ButtonXaml
     public class UserActivity : INotifyPropertyChanged
     {
         private TimeSpan totalDuration;
-        private TimeSpan remainingDuration;
         private bool runUpdate;
+        private const int timerResolution = 50;
+        private int remainingSeconds;
 
         private DateTime startTime;
+        private DateTime endTime;
+        private TimeSpan totalTime;
 
         public int Index { get; set; }
         internal TimerState ActivityState { get; set; }
@@ -70,16 +70,83 @@ namespace ButtonXaml
         {
             get
             {
-                return this.remainingDuration;
-            }
-            set
-            {
-                this.remainingDuration = value;
-                this.OnPropertyChanged("RemainingDuration");
+                return TimeSpan.FromSeconds(this.remainingSeconds);
             }
         }
 
-        public TimeSpan TotalTime { get; set; }
+        public int RemainingSeconds
+        {
+            get
+            {
+                return this.remainingSeconds;
+            }
+
+            set
+            {
+                if (this.remainingSeconds != value)
+                {
+                    this.remainingSeconds = value;
+
+                    if (value < 4)
+                    {
+                        this.PlaySounds();
+                    }
+                    if (value == 0)
+                    {
+                        runUpdate = false;
+                        this.EndTime = DateTime.Now;
+                        this.ActivityState = TimerState.Complete;
+                        this.OnStatusChanged(this.ActivityState);
+                    }
+
+                    this.OnPropertyChanged("RemainingDuration");
+                }
+            }
+        }
+
+        #region Times
+
+        public DateTime StartTime
+        {
+            get
+            {
+                return this.startTime;
+            }
+            set
+            {
+                this.startTime = value;
+                this.OnPropertyChanged("StartTime");
+            }
+        }
+
+        public DateTime EndTime
+        {
+            get
+            {
+                return this.endTime;
+            }
+            set
+            {
+                this.endTime = value;
+                this.TotalTime = value - this.startTime;
+                this.OnPropertyChanged("EndTime");
+            }
+        }
+
+        public TimeSpan TotalTime
+        {
+            get
+            {
+                return this.totalTime;
+            }
+            set
+            {
+                this.totalTime = value;
+                this.OnPropertyChanged("totalTime");
+            }
+        }
+
+        #endregion
 
         //private bool TimerElapsed()
         //{
@@ -143,40 +210,23 @@ namespace ButtonXaml
         {
             while (runUpdate)
             {
-                await Task.Delay(1000);
+                await Task.Delay(timerResolution);
                 if (runUpdate)
                 {
-                    this.RemainingDuration = this.RemainingDuration.Add(TimeSpan.FromSeconds(-1));
+                    TimeSpan timeSpanSinceStart = DateTime.Now - this.StartTime;
 
-                    if (this.RemainingDuration.Minutes == 0 && this.RemainingDuration.Seconds == 0)
-                    {
-                        this.TotalTime = DateTime.Now - this.startTime;
-                        PlaySounds();
-                        this.ActivityState = TimerState.Complete;
-                        runUpdate = false;
-                        this.OnStatusChanged(this.ActivityState);
-                    }
-                    else
-                    {
-                        if (this.RemainingDuration.Minutes == 0)
-                        {
-                            if (this.RemainingDuration.Seconds < 4)
-                            {
-                                PlaySounds();
-                            }
-                        }
-                    }
+                    this.RemainingSeconds = timeSpanSinceStart <= totalDuration ? (int)(totalDuration - timeSpanSinceStart).TotalSeconds + 1 : 0;
 
-                    //if (this.RemainingDuration.Minutes > 0 || this.RemainingDuration.Seconds > 0)
+                    //if (timeSpanSinceStart < TotalDuration)
                     //{
-                    //    if (this.RemainingDuration.Minutes < 1 && this.RemainingDuration.Seconds <= 3)
-                    //    {
-                    //        PlaySounds();
-                    //    }
-                    //    this.RemainingDuration = this.RemainingDuration.Add(TimeSpan.FromSeconds(-1));
+                    //this.RemainingDuration = timeSpanSinceStart < TotalDuration ? TotalDuration - timeSpanSinceStart: TimeSpan.FromSeconds(0); 
                     //}
                     //else
                     //{
+                    //    runUpdate = false;
+                    //    this.EndTime = DateTime.Now;
+                    //    this.ActivityState = TimerState.Complete;
+                    //    this.OnStatusChanged(this.ActivityState);
                     //}
                 }
             }
@@ -194,8 +244,7 @@ namespace ButtonXaml
                 await Audio.Manager.PlaySound("double-beep.mp3");
             }
         }
-
-
+        
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -221,10 +270,10 @@ namespace ButtonXaml
         internal bool StartTimer()
         {
             this.startTime = DateTime.Now;
-            this.RemainingDuration = this.TotalDuration;
+            //this.RemainingSeconds = (int)this.TotalDuration.TotalSeconds;
+            //this.RemainingDuration = this.TotalDuration;
             this.runUpdate = true;
             this.RunUpdateLoop();
-            //Device.StartTimer(new TimeSpan(0, 0, 0, 0, 1000), TimerElapsed);
             return true;
         }
 

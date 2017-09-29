@@ -1,4 +1,5 @@
-﻿using ButtonXaml;
+﻿using System;
+using ButtonXaml;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -15,6 +16,11 @@ namespace MotleyRunner
         }
 
         public IntervalSettings Intervals { get; set; }
+
+        private void OnClick(object sender, EventArgs e)
+        {
+            this.Navigation.RemovePage(this);
+        }
 
     }
 }

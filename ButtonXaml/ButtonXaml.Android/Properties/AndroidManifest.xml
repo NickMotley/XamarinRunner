@@ -10,7 +10,7 @@
 	<uses-permission android:name="android.permission.INTERNET" />
 	<!-- 
 	<permission android:name="MotleyRunner.MotleyRunner.permission.MAPS_RECEIVE" android:protectionLevel="signature" /> -->
-	<application android:label="Motley Runner" android:icon="@drawable/stopwatchInv">
+	<application android:label="Motley Runner" android:icon="@drawable/Icon">
 		<meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyCa5lc3D3Ettv5QENH4buqYsaWp-O8A4lM" />
 		<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 	</application>

@@ -6,7 +6,7 @@ using Xamarin.Forms.Platform.Android;
 
 namespace ButtonXaml.Android
 {
-    [Activity(Label = "MotleyRunner", ScreenOrientation = ScreenOrientation.Portrait)]
+    [Activity(Label = "MotleyRunner", MainLauncher = true, ScreenOrientation = ScreenOrientation.Portrait)]
     public class MainActivity : FormsApplicationActivity
     {
         protected override void OnCreate(Bundle bundle)

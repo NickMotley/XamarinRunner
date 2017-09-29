@@ -13,7 +13,11 @@ namespace ButtonXaml
     {
         ObservableCollection<Rep> reps;
         ObservableCollection<UserActivity> activities;
+
         private DateTime startTime;
+        private DateTime endTime;
+        private TimeSpan totalTime;
+        private bool isDoingCountdown = true;
 
         private bool countDownIsVisible;
 
@@ -23,7 +27,7 @@ namespace ButtonXaml
 
         private int progressRatio;
 
-        Rep currentRep;
+        private Rep currentRep;
 
         public ICommand IncreaseRepsCommand { get; set; }
         public ICommand DecreaseRepsCommand { get; set; }
@@ -48,8 +52,6 @@ namespace ButtonXaml
             this.ProgressRatioIncreaseCommand = new Command(IncreaseRatioDecrease);
             this.ProgressRatioDecreaseCommand = new Command(DecreaseRatioDecrease);
         }
-
-        public TimeSpan TotalTime { get; set; }
 
         #region ProgressRatio
 
@@ -141,7 +143,7 @@ namespace ButtonXaml
             else
             {
                 this.ActivityState = TimerState.Complete;
-                this.TotalTime = DateTime.Now - this.startTime;
+                this.EndTime = DateTime.Now;
                 this.OnStatusChanged(this.ActivityState);
             }
         }
@@ -212,6 +214,9 @@ namespace ButtonXaml
                 this.IncreaseActivities();
                 this.Activities[i].TotalDuration = TimeSpan.FromSeconds(int.Parse(actTimes.Split(',')[i]));
             }
+
+            this.OnPropertyChanged("Activity1Duration");
+            this.OnPropertyChanged("Activity2Duration");
         }
 
         internal void IncreaseActivities()
@@ -263,7 +268,75 @@ namespace ButtonXaml
             }
         }
 
+        public TimeSpan Activity1Duration
+        {
+            get
+            {
+                TimeSpan ts;
+                foreach (Rep rep in this.Reps)
+                {
+                    ts = ts.Add(rep.UserActivities[0].TotalDuration);
+                }
+                return ts;
+            }
+        }
 
+        public TimeSpan Activity2Duration
+        {
+            get
+            {
+                TimeSpan ts;
+                foreach (Rep rep in this.Reps)
+                {
+                    ts = ts.Add(rep.UserActivities[1].TotalDuration);
+                }
+                return ts;
+            }
+        }
+
+        #endregion
+
+        #region Times
+
+        public DateTime StartTime
+        {
+            get
+            {
+                return this.startTime;
+            }
+            set
+            {
+                this.startTime = value;
+                this.OnPropertyChanged("StartTime");
+            }
+        }
+
+        public DateTime EndTime
+        {
+            get
+            {
+                return this.endTime;
+            }
+            set
+            {
+                this.endTime = value;
+                this.TotalTime = value - this.startTime;
+                this.OnPropertyChanged("EndTime");
+            }
+        }
+
+        public TimeSpan TotalTime
+        {
+            get
+            {
+                return this.totalTime;
+            }
+            set
+            {
+                this.totalTime = value;
+                this.OnPropertyChanged("totalTime");
+            }
+        }
 
         #endregion
 
@@ -275,8 +348,11 @@ namespace ButtonXaml
             }
             set
             {
-                this.countDownRemaining = value;
-                this.OnPropertyChanged("CountDownRemaining");
+                if (this.countDownRemaining != value)
+                {
+                    this.countDownRemaining = value;
+                    this.OnPropertyChanged("CountDownRemaining");
+                }
             }
         }
 
@@ -297,6 +373,7 @@ namespace ButtonXaml
         {
             this.CountDownRemaining = 5;
             this.CountDownIsVisible = true;
+            this.isDoingCountdown = true;
             Device.StartTimer(new TimeSpan(0, 0, 0, 0, 1000), TimerElapsed);
         }
 
@@ -308,13 +385,21 @@ namespace ButtonXaml
             Device.BeginInvokeOnMainThread(() =>
             {
                 //put here your code which updates the view
-                if (this.CountDownRemaining > 1)
+                if (isDoingCountdown)
                 {
-                    this.CountDownRemaining = this.CountDownRemaining - 1;
+                    if (this.CountDownRemaining > 1)
+                    {
+                        this.CountDownRemaining = this.CountDownRemaining - 1;
+                    }
+                    else
+                    {
+                        this.CountDownIsVisible = false;
+                        this.isDoingCountdown = false;
+                    }
                 }
                 else
                 {
-                    this.CountDownIsVisible = false;
+
                 }
             });
 
@@ -347,11 +432,18 @@ namespace ButtonXaml
             }
 
         }
+        
+        private bool ProgramTimerElapsed()
+        {
+
+            return true;
+        }
 
         internal bool StartTimer()
         {
             this.CurrentRep = this.Reps.OrderBy(x => x.Index).First(x => x.ActivityState == TimerState.Pending);
             this.CurrentRep.PropertyChanged += CurrentRep_PropertyChanged;
+
             return this.CurrentRep.StartTimer();
         }
 

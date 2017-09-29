@@ -4,7 +4,7 @@ using Xamarin.Forms;
 
 namespace ButtonXaml
 {
-    public partial class SettingsPage : ContentPage
+    public partial class SettingsPage : TabbedPage
     {
 
         public SettingsPage(IntervalSettings intervals)
@@ -16,9 +16,9 @@ namespace ButtonXaml
 
         public IntervalSettings Intervals { get; set; }
 
-        protected override bool OnBackButtonPressed()
-        {
-            return base.OnBackButtonPressed();
-        }
+        //protected override bool OnBackButtonPressed()
+        //{
+        //    return base.OnBackButtonPressed();
+        //}
     }
 }

@@ -2,11 +2,13 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:MotleyRunner.Controls"
-             Title="MotleyRunner"
+             Title="Motley Runner"
              x:Class="ButtonXaml.MainForm">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Name="Settings" Activated="OnClick" Order="Primary" Priority="0" Icon="icon_settings.png" />
+        <ToolbarItem Name="Report" Activated="Report_Activated" Priority="1" Icon="stopwatchInv.png"  />
+        <ToolbarItem Name="Settings" Activated="OnClick" Order="Primary" Priority="2" Icon="icon_settings.png" />
     </ContentPage.ToolbarItems>
+    <!--<ContentPage.BackgroundImage>stopwatch.png</ContentPage.BackgroundImage>-->
     <ContentPage.Content>
         <Grid>
             <Grid.RowDefinitions>

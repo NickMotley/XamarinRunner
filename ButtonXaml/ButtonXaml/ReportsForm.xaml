@@ -7,72 +7,57 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <StackLayout Grid.Row="0">
 
-                <Label Text="CONGRATS!!!!!!" FontSize="48" />
+                <Label Text="CONGRATS!!!!!!" HorizontalOptions="Center" FontSize="48" />
+                <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                    <Label Text="Total Time: " HorizontalOptions="StartAndExpand" FontSize="42" />
+                    <Label Text="{Binding Program.TotalTime, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="End" FontSize="42" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                    <Label Text="Activity 1: " HorizontalOptions="StartAndExpand" FontSize="24" />
+                    <Label Text="{Binding Program.Activity1Duration, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="End" FontSize="24" />
+                </StackLayout>
+                <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                    <Label Text="Activity 2: " HorizontalOptions="StartAndExpand" FontSize="24" />
+                    <Label Text="{Binding Program.Activity2Duration, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="End" FontSize="24" />
+                </StackLayout>
 
                 <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                    <Label Text="Total Duration: " HorizontalOptions="Start" />
-                    <Label Text="{Binding Program.TotalTime, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="Start" />
+                    <Label Text="Start Time: " HorizontalOptions="Start" />
+                    <Label Text="{Binding Program.StartTime, StringFormat='{}{0:hh\\:mm\\:ss}'}" HorizontalOptions="StartAndExpand" />
+                    <Label Text="End Time: " HorizontalOptions="Start" />
+                    <Label Text="{Binding Program.EndTime, StringFormat='{}{0:hh\\:mm\\:ss}'}" HorizontalOptions="Start" />
                 </StackLayout>
             </StackLayout>
 
-
-            <ListView Grid.Row="1" ItemsSource="{Binding Program.Reps}" HasUnevenRows="True" BackgroundColor="Yellow" >
+            <ListView Grid.Row="1" ItemsSource="{Binding Program.Reps}" VerticalOptions="StartAndExpand" HasUnevenRows="True" Margin="2" >
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
                             <ViewCell.View>
-                                <Grid VerticalOptions="FillAndExpand" BackgroundColor="DarkGoldenrod" Margin="2" >
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    
-                                    <Label Grid.Row="0" Text="{Binding Name}" BackgroundColor="Blue" />
-                                    
-                                    <StackLayout Grid.Row="1" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                        <Label Text="Total Duration: " HorizontalOptions="Start" />
-                                        <Label Text="{Binding TotalTime, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="Start" />
+                                <StackLayout Orientation="Vertical" Margin="2" >
+                                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                        <Label Text="{Binding Name}" FontSize="36" HorizontalOptions="StartAndExpand" />
+                                        <Label Text="{Binding TotalTime, StringFormat='{}{0:mm\\:ss}'}" FontSize="36" HorizontalOptions="End" />
                                     </StackLayout>
 
-                                    <ListView Grid.Row="2" ItemsSource="{Binding UserActivities}" VerticalOptions="Start" HasUnevenRows="True" BackgroundColor="Beige">
-                                        <ListView.ItemTemplate>
-                                            <DataTemplate>
-                                                <ViewCell>
-                                                    <ViewCell.View>
-                                                        <Grid>
-                                                            <Grid.RowDefinitions>
-                                                                <RowDefinition Height="Auto" />
-                                                                <RowDefinition Height="Auto" />
-                                                            </Grid.RowDefinitions>
+                                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                        <Label Text="{Binding StartTime, StringFormat='{}{0:hh\\:mm\\:ss}'}" HorizontalOptions="Start" />
+                                        <Label Text="{Binding EndTime, StringFormat='{}{0:- hh\\:mm\\:ss}'}" HorizontalOptions="Start" />
+                                    </StackLayout>
 
-                                                            <Label Text="{Binding Name}" FontSize="Large" />
-                                                            <StackLayout Grid.Row="1" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                                <Label Text="Total Duration: " HorizontalOptions="Start" />
-                                                                <Label Text="{Binding TotalTime, StringFormat='{}{0:mm\\:ss}'}" HorizontalOptions="Start" />
-                                                            </StackLayout>
+                                    <ContentView Content="{Binding MyContent}" />
+                                    
+                                </StackLayout>
 
-                                                        </Grid>
-                                                    </ViewCell.View>
-                                                </ViewCell>
-                                            </DataTemplate>
-                                        </ListView.ItemTemplate>
-                                    </ListView>
-
-
-                                </Grid>
                             </ViewCell.View>
                         </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-
-            <Button Grid.Row="2" Text="Close" HorizontalOptions="CenterAndExpand" />
 
         </Grid>
 

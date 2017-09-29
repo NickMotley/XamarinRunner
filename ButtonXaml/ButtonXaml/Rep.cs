@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using Xamarin.Forms;
 
 namespace ButtonXaml
 {
@@ -12,6 +13,8 @@ namespace ButtonXaml
         internal TimerState ActivityState { get; set; }
 
         private DateTime startTime;
+        private DateTime endTime;
+        private TimeSpan totalTime;
 
         ObservableCollection<UserActivity> userActivities;
         UserActivity currentActivity;
@@ -89,8 +92,7 @@ namespace ButtonXaml
             }
 
             this.CurrentActivity = this.UserActivities.OrderBy(x => x.Index).First(x => x.ActivityState == TimerState.Pending);
-            Debug.WriteLine("Action: " + CurrentActivity.Name);
-            this.CurrentActivity.PropertyChanged += CurrentActivity_PropertyChanged;
+            //this.CurrentActivity.PropertyChanged += CurrentActivity_PropertyChanged;
             this.CurrentActivity.StatusChanged += CurrentActivity_StatusChanged;
 
             return CurrentActivity.StartTimer();
@@ -101,14 +103,111 @@ namespace ButtonXaml
             foreach (UserActivity activity in this.UserActivities.OrderBy(x => x.Index))
             {
                 activity.ActivityState = TimerState.Pending;
-                activity.RemainingDuration = activity.TotalDuration;
+                //activity.RemainingDuration = activity.TotalDuration;
+                activity.RemainingSeconds = (int)activity.TotalDuration.TotalSeconds;
             }
             
             this.CurrentActivity = this.UserActivities.OrderBy(x => x.Index).First();
             return true;
         }
 
-        public TimeSpan TotalTime { get; set; }
+        #region Times
+
+        public DateTime StartTime
+        {
+            get
+            {
+                return this.startTime;
+            }
+            set
+            {
+                this.startTime = value;
+                this.OnPropertyChanged("StartTime");
+            }
+        }
+
+        public DateTime EndTime
+        {
+            get
+            {
+                return this.endTime;
+            }
+            set
+            {
+                this.endTime = value;
+                this.TotalTime = value - this.startTime;
+                this.OnPropertyChanged("EndTime");
+            }
+        }
+
+        public TimeSpan TotalTime
+        {
+            get
+            {
+                return this.totalTime;
+            }
+            set
+            {
+                this.totalTime = value;
+                this.OnPropertyChanged("totalTime");
+            }
+        }
+
+        #endregion
+
+        public ContentView MyContent
+        {
+            get
+            {
+                ContentView cv = new ContentView();
+                StackLayout stackLayout = new StackLayout();
+
+                foreach (UserActivity ua in this.UserActivities)
+                {
+
+                    StackLayout slDuration = new StackLayout()
+                    {
+                        Orientation = StackOrientation.Horizontal,
+                        HorizontalOptions = LayoutOptions.FillAndExpand
+                    };
+                    slDuration.Children.Add(new Label()
+                    {
+                        Text = ua.Name,
+                        FontSize = 24,
+                        HorizontalOptions = LayoutOptions.StartAndExpand
+                    });
+                    slDuration.Children.Add(new Label()
+                    {
+                        Text = String.Format("{0:mm\\:ss}", ua.TotalDuration),
+                        FontSize = 24,
+                        HorizontalOptions = LayoutOptions.End
+                    });
+
+                    StackLayout slStart = new StackLayout()
+                    {
+                        Orientation = StackOrientation.Horizontal,
+                        HorizontalOptions = LayoutOptions.FillAndExpand
+                    };
+                    slStart.Children.Add(new Label()
+                    {
+                        Text = String.Format("{0:hh\\:mm\\:ss}", ua.StartTime),
+                        HorizontalOptions = LayoutOptions.Start
+                    });
+                    slStart.Children.Add(new Label()
+                    {
+                        Text = String.Format("- {0:hh\\:mm\\:ss}", ua.EndTime),
+                        HorizontalOptions = LayoutOptions.Start
+                    });
+
+                    stackLayout.Children.Add(slDuration);
+                    stackLayout.Children.Add(slStart);
+                }
+
+                cv.Content = stackLayout;
+
+                return cv;
+            }
+        }
 
         private void CurrentActivity_StatusChanged(object sender, TimerStatusChangeEvent e)
         {
@@ -120,8 +219,8 @@ namespace ButtonXaml
                 }
                 else
                 {
-                    this.TotalTime = DateTime.Now - this.startTime;
                     this.ActivityState = TimerState.Complete;
+                    this.EndTime = DateTime.Now;
                     this.OnStatusChanged(this.ActivityState);
                 }
             }
@@ -137,11 +236,6 @@ namespace ButtonXaml
             return CurrentActivity.ResumeTimer();
         }
 
-        private void CurrentActivity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            
-        }
-
         private void OnStatusChanged(TimerState status)
         {
             StatusChanged?.Invoke(this, new TimerStatusChangeEvent(status));
@@ -151,6 +245,5 @@ namespace ButtonXaml
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 }
